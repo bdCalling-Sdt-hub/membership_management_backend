@@ -1,0 +1,4 @@
+node_modules
+tools
+*.ts.old
+.env
