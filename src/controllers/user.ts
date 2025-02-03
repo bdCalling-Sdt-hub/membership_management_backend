@@ -3,6 +3,8 @@ import { validate } from "email-validator";
 import { StatusCodes } from "http-status-codes";
 import DB from "src/db";
 import { hash } from "bcrypt";
+import { sendEmail } from "src/services/emailService";
+import { generate } from "otp-generator";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -38,14 +40,32 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       name,
       email,
       passwordHash,
+      accountStatus: "Pending"
     });
 
     await newUser.save();
 
     // handle otp
 
-    res.status(StatusCodes.OK).json({
-      message: `User ${email} registered successfully`,
+    let otp = generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+    let result = await DB.OTPModel.findOne({ otp: otp });
+    while (result) {
+      otp = generate(6, {
+        upperCaseAlphabets: false,
+      });
+      result = await DB.OTPModel.findOne({ otp: otp });
+    }
+
+    await DB.OTPModel.create({ email, otp });
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+      otp,
     });
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

@@ -18,6 +18,12 @@ const User = new Schema({
   accountStatus: { type: String, default: "Active", required: true },
 });
 
+const OTP = new Schema({
+  email: { type: String, required: true },
+  otp: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now, expires: 60 * 5 },
+});
+
 const Referral = new Schema({
   referredBy: ObjectId,
 });
@@ -53,4 +59,4 @@ const Tools = new Schema({
 //   status: { type: String, required: true, default: "Requested" },
 // });
 
-export = { User };
+export = { User, OTP };
