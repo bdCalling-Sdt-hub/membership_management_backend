@@ -1,1 +1,4 @@
 Stack: ExpressJS, MongoDB
+
+Chores:
+- Clean up OTP logic from src/db.ts
