@@ -157,4 +157,57 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { signup, resend, validate_otp };
+const forgot_password = async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body || {};
+
+  const existingUser = await DB.UserModel.findOne({ email }).exec();
+  if (!existingUser) {
+    res.status(StatusCodes.CONFLICT).json({
+      message: `User with the email ${email} doesn't exist.`,
+    });
+    return;
+  }
+
+  const otpParams = {
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    specialChars: false,
+  };
+  let otp = generate(6, otpParams);
+  let result = await DB.OTPModel.findOne({ otp: otp });
+  while (result) {
+    otp = generate(6, otpParams);
+    result = await DB.OTPModel.findOne({ otp: otp });
+  }
+
+  await DB.OTPModel.create({ email, otp, type: "forgot_password" });
+
+  res.status(200).json({
+    success: true,
+    message: "OTP for resetting the password sent successfully",
+    otp,
+  });
+};
+
+const update_password = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req?.body || {};
+
+  const existingUser = await DB.UserModel.findOne({ email }).exec();
+  if (!existingUser) {
+    res.status(StatusCodes.CONFLICT).json({
+      message: `User with the email ${email} doesn't exist.`,
+    });
+    return;
+  }
+
+  // Hash password
+  const passwordHash = await hash(password, 10);
+
+  await DB.UserModel.updateOne({ email }, { $set: { passwordHash } });
+
+  res.status(StatusCodes.OK).json({
+    message: "Password updated successfully",
+  });
+};
+
+export { signup, resend, validate_otp, forgot_password, update_password };
