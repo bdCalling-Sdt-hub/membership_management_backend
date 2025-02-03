@@ -40,7 +40,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       email,
       passwordHash,
       accountStatus: "Pending",
-      referralCode
+      referralCode,
     });
 
     await newUser.save();
@@ -84,6 +84,12 @@ const resend = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
+    if (existingUser.accountStatus === "Verified") {
+      res.status(StatusCodes.CONFLICT).json({
+        message: `This user is already verified.`,
+      });
+      return;
+    }
 
     const otpParams = {
       upperCaseAlphabets: false,
@@ -111,4 +117,44 @@ const resend = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { signup, resend };
+const validate_otp = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, otp } = req.body || {};
+
+    if (!email || !otp) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Find the most recent OTP for the email
+    const response = await DB.OTPModel.find({ email })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (response.length === 0 || otp !== response[0].otp) {
+      res.status(400).json({
+        message: "The OTP is not valid",
+      });
+      return;
+    }
+
+    // delete otp document after verification
+    await DB.OTPModel.deleteMany({ email });
+
+    // Update user account status
+    await DB.UserModel.updateOne(
+      { email }, // Find the user by email
+      { $set: { accountStatus: "Verified" } } // Update the status field
+    );
+
+    res.status(StatusCodes.OK).json({
+      message: `Email ${email} verified successfully`,
+    });
+  } catch (error: any) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+export { signup, resend, validate_otp };
