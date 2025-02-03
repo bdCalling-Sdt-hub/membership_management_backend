@@ -2,6 +2,7 @@ import type { Express } from "express";
 import {
   forgot_password,
   resend,
+  signin,
   signup,
   update_password,
   validate_otp,
@@ -14,7 +15,7 @@ export default function (app: Express) {
   app.post("/validate-otp", validate_otp);
   app.post("/forgot-password", forgot_password);
   app.post("/update-password", update_password);
-  //   app.post("/sign-in");
+  app.post("/sign-in", signin);
   //   app.post("/forgot-password");
   //   app.post("/reset-password");
   //   app.get("/profile");

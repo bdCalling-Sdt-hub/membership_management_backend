@@ -2,8 +2,9 @@ import type { Request, Response } from "express";
 import { validate } from "email-validator";
 import { StatusCodes } from "http-status-codes";
 import DB from "src/db";
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { generate } from "otp-generator";
+import { sign } from "jsonwebtoken";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -210,4 +211,48 @@ const update_password = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-export { signup, resend, validate_otp, forgot_password, update_password };
+const signin = async (req: Request, res: Response): Promise<void> => {
+  const { email, password, remember_me } = req.body || {};
+
+  // check if email password matches with DB
+  const user = await DB.UserModel.find({ email }).exec();
+  if (user.length === 0) throw new Error("User doesn't exist");
+
+  // Compare passwords
+  const isMatch = await compare(password, user[0].passwordHash);
+  if (!isMatch) {
+    res.status(StatusCodes.CONFLICT).json({
+      message: "Password is incorrect",
+    });
+
+    return;
+  }
+
+  // Generate tokens
+  const accessToken = sign(
+    { email, userId: user[0]._id },
+    process.env.ACCESS_TOKEN_SECRET || "fallback_secret",
+    { expiresIn: "2m" }
+  );
+
+  const refreshToken = sign(
+    { email, userId: user[0]._id },
+    process.env.REFRESH_TOKEN_SECRET || "fallback_secret",
+    { expiresIn: remember_me ? "30d" : "10m" }
+  );
+
+  res.status(StatusCodes.OK).json({
+    message: "Login successful",
+    accessToken,
+    refreshToken,
+  });
+};
+
+export {
+  signup,
+  resend,
+  validate_otp,
+  forgot_password,
+  update_password,
+  signin,
+};

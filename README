@@ -4,3 +4,4 @@ Chores:
 - Clean up OTP logic from src/db.ts
 - setup SMTP on Nodemailer :/
 - /update-password is not secure, fix it
+- /validate-otp should respond with JWT for security
