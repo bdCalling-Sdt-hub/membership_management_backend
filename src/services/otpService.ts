@@ -30,3 +30,8 @@ export function attachOTPHooks() {
     next();
   });
 }
+
+export const OTPTypes = {
+  SIGNUP: "signup",
+  FORGOT_PASSWORD: "forgot_password",
+};

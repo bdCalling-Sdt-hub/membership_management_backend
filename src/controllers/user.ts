@@ -4,18 +4,28 @@ import { StatusCodes } from "http-status-codes";
 import DB from "src/db";
 import { compare, hash } from "bcrypt";
 import { generate } from "otp-generator";
-import { sign } from "jsonwebtoken";
+import { JwtPayload, sign, verify } from "jsonwebtoken";
+import { OTPTypes } from "@services/otpService";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, referralCode } = req.body || {};
+    const {
+      name,
+      email: emailFromBody,
+      password,
+      referralCode,
+    } = req.body || {};
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!name || !emailFromBody || !password) {
       res.status(StatusCodes.BAD_REQUEST).json({
         message: "Name, Email, and Password are required",
       });
+      return;
     }
+
+    // normalize email
+    const email = emailFromBody.trim().toLowerCase();
 
     // Validate email format
     if (!validate(email)) {
@@ -31,6 +41,13 @@ const signup = async (req: Request, res: Response): Promise<void> => {
         message: `User with the email ${email} already exists.`,
       });
       return;
+    }
+
+    if (referralCode) {
+      const referrer = await DB.UserModel.findOne({ referralCode }).exec();
+      if (!referrer) {
+        res.status(400).json({ message: "Invalid referral code." });
+      }
     }
 
     // Hash password
@@ -59,7 +76,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       result = await DB.OTPModel.findOne({ otp: otp });
     }
 
-    await DB.OTPModel.create({ email, otp, type: "signup" });
+    await DB.OTPModel.create({ email, otp, type: OTPTypes.SIGNUP });
 
     res.status(200).json({
       success: true,
@@ -75,7 +92,10 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
 const resend = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email } = req.body || {};
+    const { email: emailFromBody, type } = req.body || {};
+
+    // normalize email
+    const email = emailFromBody.trim().toLowerCase();
 
     // Check if email already exists
     const existingUser = await DB.UserModel.findOne({ email }).exec();
@@ -104,7 +124,7 @@ const resend = async (req: Request, res: Response): Promise<void> => {
       result = await DB.OTPModel.findOne({ otp: otp });
     }
 
-    await DB.OTPModel.create({ email, otp, type: "login" });
+    await DB.OTPModel.create({ email, otp, type });
 
     res.status(200).json({
       success: true,
@@ -120,13 +140,16 @@ const resend = async (req: Request, res: Response): Promise<void> => {
 
 const validate_otp = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, otp } = req.body || {};
+    const { email: emailFromBody, otp } = req.body || {};
 
-    if (!email || !otp) {
+    if (!emailFromBody || !otp) {
       res.status(StatusCodes.BAD_REQUEST).json({
         message: "Email and OTP are required",
       });
     }
+
+    // normalize email
+    const email = emailFromBody.trim().toLowerCase();
 
     // Find the most recent OTP for the email
     const response = await DB.OTPModel.find({ email })
@@ -143,10 +166,26 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
     await DB.OTPModel.deleteMany({ email });
 
     // Update user account status
-    await DB.UserModel.updateOne(
-      { email }, // Find the user by email
-      { $set: { accountStatus: "Verified" } } // Update the status field
-    );
+    if (response[0].type === OTPTypes.SIGNUP) {
+      await DB.UserModel.updateOne(
+        { email },
+        { $set: { accountStatus: "Verified" } }
+      );
+    }
+
+    if (response[0].type === OTPTypes.FORGOT_PASSWORD) {
+      const passwordResetToken = sign(
+        { email, purpose: "password_reset" },
+        process.env.PASSWORD_RESET_SECRET || "fallback_secret",
+        { expiresIn: "10m" }
+      );
+
+      res.status(200).json({
+        message: "OTP verified successfully",
+        passwordResetToken,
+      });
+      return;
+    }
 
     res.status(StatusCodes.OK).json({
       message: `Email ${email} verified successfully`,
@@ -159,7 +198,10 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
 };
 
 const forgot_password = async (req: Request, res: Response): Promise<void> => {
-  const { email } = req.body || {};
+  const { email: emailFromBody } = req.body || {};
+
+  // normalize email
+  const email = emailFromBody.trim().toLowerCase();
 
   const existingUser = await DB.UserModel.findOne({ email }).exec();
   if (!existingUser) {
@@ -181,7 +223,7 @@ const forgot_password = async (req: Request, res: Response): Promise<void> => {
     result = await DB.OTPModel.findOne({ otp: otp });
   }
 
-  await DB.OTPModel.create({ email, otp, type: "forgot_password" });
+  await DB.OTPModel.create({ email, otp, type: OTPTypes.FORGOT_PASSWORD });
 
   res.status(200).json({
     success: true,
@@ -191,7 +233,32 @@ const forgot_password = async (req: Request, res: Response): Promise<void> => {
 };
 
 const update_password = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req?.body || {};
+  const { password } = req?.body || {};
+  const passwordResetToken = req.headers.authorization?.split(" ")[1];
+
+  if (!passwordResetToken) {
+    res.status(401).json({ message: "Unauthorized. Missing token." });
+    return;
+  }
+
+  // Verify JWT
+  let decoded: JwtPayload;
+  try {
+    decoded = verify(
+      passwordResetToken,
+      process.env.PASSWORD_RESET_SECRET || "fallback_secret"
+    ) as JwtPayload;
+  } catch (err) {
+    res.status(403).json({ message: "Invalid or expired token." });
+    return;
+  }
+
+  if (!decoded?.purpose || decoded?.purpose !== "password_reset") {
+    res.status(403).json({ message: "Invalid token purpose." });
+    return;
+  }
+
+  const email = decoded?.email;
 
   const existingUser = await DB.UserModel.findOne({ email }).exec();
   if (!existingUser) {
@@ -212,11 +279,21 @@ const update_password = async (req: Request, res: Response): Promise<void> => {
 };
 
 const signin = async (req: Request, res: Response): Promise<void> => {
-  const { email, password, remember_me } = req.body || {};
+  const { email: emailFromBody, password, remember_me } = req.body || {};
+
+  // normalize email
+  const email = emailFromBody.trim().toLowerCase();
 
   // check if email password matches with DB
   const user = await DB.UserModel.find({ email }).exec();
   if (user.length === 0) throw new Error("User doesn't exist");
+
+  // check if user account is verified
+  if (user[0].accountStatus !== "Verified") {
+    res.status(403).json({
+      message: "Account is not verified. Please verify your email first.",
+    });
+  }
 
   // Compare passwords
   const isMatch = await compare(password, user[0].passwordHash);
