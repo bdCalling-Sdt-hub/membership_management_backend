@@ -1,11 +1,15 @@
 Stack: ExpressJS, MongoDB
 
-Chores:
-- /update-password is not secure, fix it
-- /validate-otp should respond with JWT for security
-
 Clean Up:
 - remove otp from responses. src/controllers/user.ts
 
 Improvements:
 - Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
+
+Todos:
+- Build tools tab apis
+- Build profile tab apis
+- tools video/file page pagination
+
+Bug:
+- tools/upload. after file upload, the secure url doesn't work 

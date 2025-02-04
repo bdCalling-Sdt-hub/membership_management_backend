@@ -7,6 +7,16 @@ import {
   update_password,
   validate_otp,
 } from "@controllers/user";
+import {
+  add_category,
+  delete_category,
+  tools,
+  update_category,
+  upload,
+} from "@controllers/tools";
+import multer from "multer";
+
+const multerUpload = multer({ dest: "uploads/" });
 
 export default function (app: Express) {
   // USER AUTH
@@ -25,8 +35,7 @@ export default function (app: Express) {
   // - referral history
 
   // TOOLS
-  // app.get("/tools");
-  // app.get("/tools/:id");
+  app.get("/tools", tools);
 
   // NOTIFICATIONS
   // app.get("/notifications")
@@ -51,13 +60,18 @@ export default function (app: Express) {
   // app.post("/ban-user")
 
   // TOOLS MANAGEMENT
-  // app.get("/admin-tools")
-  // app.put("/admin-tools")
-  // app.delete("/admin-tools")
+  // app.get("/tools/all", all_tools);
+  const uploadFields = multerUpload.fields([
+    { name: "video", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]);
+  app.post("/tools/upload", uploadFields, upload);
+  // app.put("/tools/update_tool", update_tool);
+  // app.delete("/tools/delete_tool", update_tool);
 
   // EARNINGS
   // app.get("/earnings")
-  
+
   // WITHDRAW REQUEST
   // app.get("/withdraw-requests")
 
@@ -67,9 +81,9 @@ export default function (app: Express) {
   // app.delete("/referral-commissions")
 
   // TOOLS CATEGORY
-  // app.get("/tools-category")
-  // app.put("/tools-category")
-  // app.delete("/tools-category")
+  app.post("/tools/add_category", add_category);
+  app.put("/tools/update_category", update_category);
+  app.delete("/tools/delete_category", delete_category);
 
   // PROFILE
   // app.post("/change-password")

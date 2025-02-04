@@ -166,12 +166,12 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
     await DB.OTPModel.deleteMany({ email });
 
     // Update user account status
-    if (response[0].type === OTPTypes.SIGNUP) {
-      await DB.UserModel.updateOne(
-        { email },
-        { $set: { accountStatus: "Verified" } }
-      );
-    }
+    // even if its not a signup OTP, we can update the account status
+    // because the only way to validate OTP is through the email
+    await DB.UserModel.updateOne(
+      { email },
+      { $set: { accountStatus: "Verified" } }
+    );
 
     if (response[0].type === OTPTypes.FORGOT_PASSWORD) {
       const passwordResetToken = sign(
@@ -286,13 +286,19 @@ const signin = async (req: Request, res: Response): Promise<void> => {
 
   // check if email password matches with DB
   const user = await DB.UserModel.find({ email }).exec();
-  if (user.length === 0) throw new Error("User doesn't exist");
+  if (user?.length === 0) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "User not found",
+    });
+    return;
+  }
 
   // check if user account is verified
   if (user[0].accountStatus !== "Verified") {
     res.status(403).json({
       message: "Account is not verified. Please verify your email first.",
     });
+    return;
   }
 
   // Compare passwords

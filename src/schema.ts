@@ -31,12 +31,14 @@ const Referral = new Schema({
 
 // Tools tab
 const Video = new Schema({
+  toolId: { type: ObjectId, required: true },
   title: { type: String, required: true },
   url: { type: String, required: true },
   views: { type: Number, default: 0, required: true },
 });
 
 const File = new Schema({
+  toolId: { type: ObjectId, required: true },
   title: { type: String, required: true },
   url: { type: String, required: true },
   downloads: { type: Number, default: 0, required: true },
@@ -44,8 +46,7 @@ const File = new Schema({
 
 const Tool = new Schema({
   name: { type: String, required: true },
-  videos: [Video],
-  files: [File],
+  icon: { type: String, required: true },
 });
 
 const Tools = new Schema({
@@ -60,4 +61,4 @@ const Tools = new Schema({
 //   status: { type: String, required: true, default: "Requested" },
 // });
 
-export = { User, OTP };
+export = { User, OTP, Tool, Video, File };
