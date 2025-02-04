@@ -8,7 +8,7 @@ import DB from "src/db";
 // get video and file by category with pagination
 
 const tools = async (req: Request, res: Response): Promise<void> => {
-  const { id, page, limit } = req.query;
+  const { id, type, page, limit } = req.query;
 
   if (!id) {
     const tools = await DB.ToolModel.find({}, { id: 1, name: 1, icon: 1 });
@@ -29,6 +29,40 @@ const tools = async (req: Request, res: Response): Promise<void> => {
 
   if (!tool) {
     res.status(404).json({ message: "Tool category not found" });
+    return;
+  }
+
+  if (type === "video") {
+    const videos = await DB.VideoModel.find({ toolId: id }, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    const total = await DB.VideoModel.countDocuments({ toolId: id });
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.json({ tool, videos, pagination });
+    return;
+  }
+
+  if (type === "file") {
+    const files = await DB.FileModel.find({ toolId: id }, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    const total = await DB.FileModel.countDocuments({ toolId: id });
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.json({ tool, files, pagination });
     return;
   }
 
@@ -74,7 +108,7 @@ const upload = async (req: Request, res: Response): Promise<void> => {
 
   if (video) {
     const videoUrl = await uploadService(video[0], "video");
-    
+
     if (!videoUrl) {
       res.status(500).json({ message: "Error uploading video" });
       return;

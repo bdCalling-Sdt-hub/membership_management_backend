@@ -9,7 +9,6 @@ Improvements:
 Todos:
 - Build tools tab apis
 - Build profile tab apis
-- tools video/file page pagination
 
 Bug:
 - tools/upload. after file upload, the secure url doesn't work 
