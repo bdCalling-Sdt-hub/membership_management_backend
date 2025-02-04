@@ -15,6 +15,7 @@ import {
   upload,
 } from "@controllers/tools";
 import multer from "multer";
+// import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
 

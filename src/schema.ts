@@ -49,10 +49,6 @@ const Tool = new Schema({
   icon: { type: String, required: true },
 });
 
-const Tools = new Schema({
-  list: [Tool],
-});
-
 // Wallet tab
 // const Withdraw = new Schema({
 //   transactionId: { type: String, required: true },
