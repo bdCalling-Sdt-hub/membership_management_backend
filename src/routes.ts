@@ -70,6 +70,7 @@ export default function (app: Express) {
   app.post("/tools/upload", uploadFields, upload);
   // app.put("/tools/update_tool", update_tool);
   // app.delete("/tools/delete_tool", update_tool);
+  // app.delete("/tools/delete_tool", update_tool);
 
   // EARNINGS
   // app.get("/earnings")

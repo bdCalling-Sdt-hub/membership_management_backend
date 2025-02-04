@@ -215,22 +215,43 @@ const delete_category = async (req: Request, res: Response): Promise<void> => {
 
 // Tools Management
 const all_tools = async (req: Request, res: Response): Promise<void> => {
-  const { type, page, limit } = req.query;
+  const { type, page, limit, query } = req.query;
 
   if (!type) {
     res.status(400).json({ message: "Type is required" });
     return;
   }
 
-  if (type != "video" && type != "file") {
+  if (type !== "video" && type !== "file") {
     res.status(400).json({ message: "Invalid type" });
     return;
   }
 
+  const pageNumber = +(page || 1);
+  const limitNumber = +(limit || 10);
+
   if (type === "video") {
-    const fetchedVideos = await DB.VideoModel.find({}, { __v: 0 })
-      .skip((+(page || 1) - 1) * +(limit || 10))
-      .limit(+(limit || 10));
+    const videoQuery: any = {};
+    const toolQuery: any = {};
+
+    // Filter by tool category if query is provided
+    if (query) {
+      const toolCategories = await DB.ToolModel.find(
+        { name: { $regex: query, $options: "i" } }, // Case-insensitive search
+        { _id: 1 }
+      );
+
+      if (toolCategories.length > 0) {
+        videoQuery.toolId = { $in: toolCategories.map((tool) => tool._id) };
+      } else {
+        res.json({ videos: [], pagination: { page: pageNumber, limit: limitNumber, total: 0, totalPages: 0 } });
+        return;
+      }
+    }
+
+    const fetchedVideos = await DB.VideoModel.find(videoQuery, { __v: 0 })
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
 
     const videoToolIds = fetchedVideos.map((video) => video.toolId);
     const tools = await DB.ToolModel.find({ _id: { $in: videoToolIds } });
@@ -248,12 +269,12 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       };
     });
 
-    const total = await DB.VideoModel.countDocuments();
+    const total = await DB.VideoModel.countDocuments(videoQuery);
     const pagination = {
-      page: +(page || 1),
-      limit: +(limit || 10),
+      page: pageNumber,
+      limit: limitNumber,
       total,
-      totalPages: Math.ceil(total / +(limit || 10)),
+      totalPages: Math.ceil(total / limitNumber),
     };
 
     res.json({ videos, pagination });
@@ -261,9 +282,27 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
   }
 
   if (type === "file") {
-    const fetchedFiles = await DB.FileModel.find({}, { __v: 0 })
-      .skip((+(page || 1) - 1) * +(limit || 10))
-      .limit(+(limit || 10));
+    const fileQuery: any = {};
+    const toolQuery: any = {};
+
+    // Filter by tool category if query is provided
+    if (query) {
+      const toolCategories = await DB.ToolModel.find(
+        { name: { $regex: query, $options: "i" } }, // Case-insensitive search
+        { _id: 1 }
+      );
+
+      if (toolCategories.length > 0) {
+        fileQuery.toolId = { $in: toolCategories.map((tool) => tool._id) };
+      } else {
+        res.json({ files: [], pagination: { page: pageNumber, limit: limitNumber, total: 0, totalPages: 0 } });
+        return;
+      }
+    }
+
+    const fetchedFiles = await DB.FileModel.find(fileQuery, { __v: 0 })
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
 
     const fileToolIds = fetchedFiles.map((file) => file.toolId);
     const tools = await DB.ToolModel.find({ _id: { $in: fileToolIds } });
@@ -281,12 +320,12 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       };
     });
 
-    const total = await DB.FileModel.countDocuments();
+    const total = await DB.FileModel.countDocuments(fileQuery);
     const pagination = {
-      page: +(page || 1),
-      limit: +(limit || 10),
+      page: pageNumber,
+      limit: limitNumber,
       total,
-      totalPages: Math.ceil(total / +(limit || 10)),
+      totalPages: Math.ceil(total / limitNumber),
     };
 
     res.json({ files, pagination });
