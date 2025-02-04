@@ -59,7 +59,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       result = await DB.OTPModel.findOne({ otp: otp });
     }
 
-    await DB.OTPModel.create({ email, otp });
+    await DB.OTPModel.create({ email, otp, type: "signup" });
 
     res.status(200).json({
       success: true,
@@ -104,7 +104,7 @@ const resend = async (req: Request, res: Response): Promise<void> => {
       result = await DB.OTPModel.findOne({ otp: otp });
     }
 
-    await DB.OTPModel.create({ email, otp });
+    await DB.OTPModel.create({ email, otp, type: "login" });
 
     res.status(200).json({
       success: true,
