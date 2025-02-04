@@ -32,6 +32,19 @@ const tools = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  if (!type) {
+    const videos = await DB.VideoModel.find({ toolId: id }, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    const files = await DB.FileModel.find({ toolId: id }, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    res.json({ tool, videos, files });
+    return;
+  }
+
   if (type === "video") {
     const videos = await DB.VideoModel.find({ toolId: id }, { __v: 0 })
       .skip((+(page || 1) - 1) * +(limit || 10))
