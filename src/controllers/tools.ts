@@ -214,23 +214,85 @@ const delete_category = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Tools Management
-// const all_tools = async (req: Request, res: Response): Promise<void> => {
-//   const { type, page, count } = req.query;
+const all_tools = async (req: Request, res: Response): Promise<void> => {
+  const { type, page, limit } = req.query;
 
-//   if (!type) {
-//     res.status(400).json({ message: "Type is required" });
-//     return;
-//   }
+  if (!type) {
+    res.status(400).json({ message: "Type is required" });
+    return;
+  }
 
-//   if (!["videos", "files"].includes(type)) {
-//     res.status(400).json({ message: "Invalid type" });
-//     return;
-//   }
+  if (type != "video" && type != "file") {
+    res.status(400).json({ message: "Invalid type" });
+    return;
+  }
 
-//   const tools = await DB.ToolModel.find({}, { id: 1, name: 1, icon: 1 });
+  if (type === "video") {
+    const fetchedVideos = await DB.VideoModel.find({}, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
 
-//   res.json(tools);
-// };
+    const videoToolIds = fetchedVideos.map((video) => video.toolId);
+    const tools = await DB.ToolModel.find({ _id: { $in: videoToolIds } });
+
+    const videos = fetchedVideos.map((video) => {
+      const tool = tools.find(
+        (tool) => tool._id.toString() === video.toolId.toString()
+      );
+
+      return {
+        _id: video._id.toString(),
+        category: tool?.name,
+        title: video.title,
+        url: video.url,
+      };
+    });
+
+    const total = await DB.VideoModel.countDocuments();
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.json({ videos, pagination });
+    return;
+  }
+
+  if (type === "file") {
+    const fetchedFiles = await DB.FileModel.find({}, { __v: 0 })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    const fileToolIds = fetchedFiles.map((file) => file.toolId);
+    const tools = await DB.ToolModel.find({ _id: { $in: fileToolIds } });
+
+    const files = fetchedFiles.map((file) => {
+      const tool = tools.find(
+        (tool) => tool._id.toString() === file.toolId.toString()
+      );
+
+      return {
+        _id: file._id.toString(),
+        category: tool?.name,
+        title: file.title,
+        url: file.url,
+      };
+    });
+
+    const total = await DB.FileModel.countDocuments();
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.json({ files, pagination });
+    return;
+  }
+};
 
 export {
   tools,
@@ -238,5 +300,5 @@ export {
   add_category,
   update_category,
   delete_category,
-  // all_tools
+  all_tools,
 };

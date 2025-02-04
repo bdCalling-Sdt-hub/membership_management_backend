@@ -9,6 +9,7 @@ import {
 } from "@controllers/user";
 import {
   add_category,
+  all_tools,
   delete_category,
   tools,
   update_category,
@@ -61,7 +62,7 @@ export default function (app: Express) {
   // app.post("/ban-user")
 
   // TOOLS MANAGEMENT
-  // app.get("/tools/all", all_tools);
+  app.get("/tools/all", all_tools);
   const uploadFields = multerUpload.fields([
     { name: "video", maxCount: 1 },
     { name: "file", maxCount: 1 },
