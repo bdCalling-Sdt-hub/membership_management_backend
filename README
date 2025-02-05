@@ -1,4 +1,4 @@
-Stack: ExpressJS, MongoDB
+Stack: ExpressJS, MongoDB, Socket.IO
 
 Clean Up:
 - remove otp from responses. src/controllers/user.ts
@@ -8,6 +8,46 @@ Improvements:
 
 Todos:
 - Referral commission logic
+- Referral commission CRUD
+- Earnings list
+- Withdraw Request list
+- Tools Category: Add Image/Icon upload option
+- Admin and App Dashboards
 
 Bug:
-- tools/upload. after file upload, the secure url doesn't work 
+- tools/upload. after file upload, the secure url doesn't work
+
+Done:
+- Auth:
+  - Signup
+  - Signin
+  - Forgot Password
+  - Resend OTP
+  - Validate OTP
+  - Update Password
+
+- Tools:
+  - Get Tools
+  - Get Tools by ID
+  - Category Management:
+    - Add Category
+    - Update Category
+    - Delete Category
+  - Tools Management:
+    - Get All Tools
+    - Update Tool
+    - Delete Tool
+    - Upload File/Video
+
+- Profile:
+  - Get Profile
+  - Update Profile
+  - Delete Account
+  - Change Password
+
+- Notifications:
+  - Get All Notifications
+
+- Users:
+  - Get Users
+  - Toggle Ban

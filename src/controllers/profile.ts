@@ -47,7 +47,7 @@ const update_profile = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { name, phone, date_of_birth, gender } = req.body;
+    const { name, phone, date_of_birth, gender, address, email } = req.body;
 
     const update = {} as any;
 
@@ -66,6 +66,14 @@ const update_profile = async (req: Request, res: Response): Promise<void> => {
 
     if (gender) {
       update.gender = gender;
+    }
+
+    if (address) {
+      update.address = address;
+    }
+
+    if (email) {
+      update.email = email;
     }
 
     // check for photo upload

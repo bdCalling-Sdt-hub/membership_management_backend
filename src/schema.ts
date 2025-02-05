@@ -13,6 +13,7 @@ const User = new Schema({
   phoneNumber: String,
   dateOfBirth: Date,
   gender: String,
+  address: String,
   referralCode: String,
   // auth
   passwordHash: { type: String, required: true },
