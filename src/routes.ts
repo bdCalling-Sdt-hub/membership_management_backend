@@ -27,6 +27,10 @@ import {
 import { notifications } from "@controllers/notifications";
 import { isAuthenticated } from "@middleware/auth";
 import { toggle_ban, users } from "@controllers/user";
+import {
+  referral_commissions,
+  update_referral_commissions,
+} from "@controllers/referral_commissions";
 
 const multerUpload = multer({ dest: "uploads/" });
 const uploadFields = multerUpload.fields([
@@ -93,15 +97,11 @@ export default function (app: Express) {
   // app.get("/withdraw-requests")
 
   // REFERRAL COMMISSION
-  // app.get("/referral-commissions")
-  // app.put("/referral-commissions")
-  // app.delete("/referral-commissions")
+  app.get("/referral-commissions", referral_commissions);
+  app.put("/referral-commissions", update_referral_commissions);
 
   // TOOLS CATEGORY
   app.post("/tools/add_category", add_category);
   app.put("/tools/update_category", update_category);
   app.delete("/tools/delete_category", delete_category);
-
-  // PROFILE
-  // app.post("/change-password")
 }

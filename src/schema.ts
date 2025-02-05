@@ -1,4 +1,3 @@
-import { create } from "domain";
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
@@ -57,4 +56,11 @@ const Notification = new Schema({
   isRead: { type: Boolean, default: false, required: true },
 });
 
-export = { User, OTP, Tool, Video, File, Notification };
+// Referral Commissions
+const ReferralCommission = new Schema({
+  referralLevel: { type: Number, required: true },
+  levelName: { type: String, required: true },
+  commission: { type: Number, required: true },
+});
+
+export = { User, OTP, Tool, Video, File, Notification, ReferralCommission };

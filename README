@@ -8,7 +8,6 @@ Improvements:
 
 Todos:
 - Referral commission logic
-- Referral commission CRUD
 - Earnings list
 - Withdraw Request list
 - Tools Category: Add Image/Icon upload option
@@ -51,3 +50,7 @@ Done:
 - Users:
   - Get Users
   - Toggle Ban
+
+- Referral Commissions:
+  - Get Referral Commissions
+  - Update Referral Commissions
