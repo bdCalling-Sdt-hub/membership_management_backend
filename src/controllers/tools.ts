@@ -437,7 +437,37 @@ const update_tool = async (req: Request, res: Response): Promise<void> => {
 };
 
 const delete_tool = async (req: Request, res: Response): Promise<void> => {
-  res.json({ message: "Delete tool" });
+  const { id, type } = req.query;
+
+  if (!id || !type) {
+    res.status(400).json({ message: "Id and type are required" });
+    return;
+  }
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid id" });
+    return;
+  }
+
+  if (type === "video") {
+    const video = await DB.VideoModel.findByIdAndDelete(id);
+
+    if (!video) {
+      res.status(404).json({ message: "Video not found" });
+      return;
+    }
+  }
+
+  if (type === "file") {
+    const file = await DB.FileModel.findByIdAndDelete(id);
+
+    if (!file) {
+      res.status(404).json({ message: "File not found" });
+      return;
+    }
+  }
+
+  res.json({ message: "File deleted successfully" });
 };
 
 export {
