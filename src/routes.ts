@@ -7,7 +7,7 @@ import {
   signup,
   update_password,
   validate_otp,
-} from "@controllers/user";
+} from "@controllers/auth";
 import {
   add_category,
   all_tools,
@@ -26,6 +26,7 @@ import {
 } from "@controllers/profile";
 import { notifications } from "@controllers/notifications";
 import { isAuthenticated } from "@middleware/auth";
+import { toggle_ban, users } from "@controllers/user";
 
 const multerUpload = multer({ dest: "uploads/" });
 const uploadFields = multerUpload.fields([
@@ -76,8 +77,8 @@ export default function (app: Express) {
   // app.get("/referral-overview")
 
   // USER MANAGEMENT
-  // app.get("/users")
-  // app.post("/ban-user")
+  app.get("/users", users);
+  app.get("/toggle-ban", toggle_ban);
 
   // TOOLS MANAGEMENT
   app.get("/tools/all", all_tools);
