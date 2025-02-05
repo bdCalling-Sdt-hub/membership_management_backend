@@ -5,6 +5,8 @@ interface Request extends ExpressRequest {
 import { config } from "dotenv";
 import DB from "src/db";
 import uploadService from "@services/uploadService";
+import { compare, hash } from "bcrypt";
+
 config();
 
 const profile = async (req: Request, res: Response): Promise<void> => {
@@ -91,10 +93,61 @@ const update_profile = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const delete_account = async (req: Request, res: Response): Promise<void> => {};
-const change_password = async (
-  req: Request,
-  res: Response
-): Promise<void> => {};
+const delete_account = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.user;
+
+    // check if the user exists
+    const user = await DB.UserModel.findById(id);
+
+    if (!user || user.accountStatus === "deleted") {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // update user accountStatus to deleted
+    await DB.UserModel.findByIdAndUpdate(id, { accountStatus: "deleted" });
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const change_password = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.user;
+  const { old_password, new_password } = req.body;
+
+  // check if the user exists
+  const user = await DB.UserModel.findById(id);
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  // check if the old password is correct
+  const isPasswordValid = await new Promise((resolve, reject) => {
+    compare(old_password, user.passwordHash, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+
+  if (!isPasswordValid) {
+    res.status(400).json({ message: "Old password is incorrect" });
+    return;
+  }
+
+  const newPasswordHash = await hash(
+    new_password,
+    Number(process.env.SALT_ROUNDS) || 10
+  );
+
+  await DB.UserModel.findByIdAndUpdate(id, { passwordHash: newPasswordHash });
+  res.status(200).json({ message: "Password changed successfully" });
+};
 
 export { profile, update_profile, delete_account, change_password };

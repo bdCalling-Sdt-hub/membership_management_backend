@@ -65,8 +65,8 @@ export default function (app: Express) {
     multerUpload.single("photo"),
     update_profile
   );
-  app.delete("/delete-account", delete_account);
-  app.post("/change-password", change_password);
+  app.delete("/delete-account", isAuthenticated, delete_account);
+  app.post("/change-password", isAuthenticated, change_password);
 
   // ------------------------------
 

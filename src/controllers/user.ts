@@ -6,6 +6,9 @@ import { compare, hash } from "bcrypt";
 import { generate } from "otp-generator";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { OTPTypes } from "@services/otpService";
+import { config } from "dotenv";
+
+config();
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -51,7 +54,10 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Hash password
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(
+      password,
+      Number(process.env.SALT_ROUNDS) || 10
+    );
 
     const newUser = new DB.UserModel({
       name,
@@ -269,7 +275,10 @@ const update_password = async (req: Request, res: Response): Promise<void> => {
   }
 
   // Hash password
-  const passwordHash = await hash(password, 10);
+  const passwordHash = await hash(
+    password,
+    Number(process.env.SALT_ROUNDS) || 10
+  );
 
   await DB.UserModel.updateOne({ email }, { $set: { passwordHash } });
 
