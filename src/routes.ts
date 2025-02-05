@@ -24,7 +24,7 @@ import {
   profile,
   update_profile,
 } from "@controllers/profile";
-// import { isAuthenticated } from "@middleware/auth";
+import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
 const uploadFields = multerUpload.fields([
@@ -58,10 +58,15 @@ export default function (app: Express) {
   // app.get("/withdraw-history")
 
   // PROFILE
-  app.get("/profile", profile);
-  app.put("/update-profile", update_profile);
+  app.get("/profile", isAuthenticated, profile);
+  app.put(
+    "/update-profile",
+    isAuthenticated,
+    multerUpload.single("photo"),
+    update_profile
+  );
   app.delete("/delete-account", delete_account);
-  app.delete("/change-password", change_password);
+  app.post("/change-password", change_password);
 
   // ------------------------------
 
