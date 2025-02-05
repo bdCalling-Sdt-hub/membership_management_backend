@@ -1,3 +1,4 @@
+import { create } from "domain";
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
@@ -25,10 +26,6 @@ const OTP = new Schema({
   type: { type: String, required: true },
 });
 
-const Referral = new Schema({
-  referredBy: ObjectId,
-});
-
 // Tools tab
 const Video = new Schema({
   toolId: { type: ObjectId, required: true },
@@ -49,12 +46,14 @@ const Tool = new Schema({
   icon: { type: String, required: true },
 });
 
-// Wallet tab
-// const Withdraw = new Schema({
-//   transactionId: { type: String, required: true },
-//   createdAt: { type: Date, required: true, default: new Date() },
-//   amount: { type: mongoose.Decimal128, default: 0.0, required: true },
-//   status: { type: String, required: true, default: "Requested" },
-// });
+// Notifcations tab
+const Notification = new Schema({
+  createdAt: { type: Date, default: Date.now },
+  recipientId: { type: ObjectId, ref: "User" },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  type: { type: String, required: true },
+  isRead: { type: Boolean, default: false, required: true },
+});
 
-export = { User, OTP, Tool, Video, File };
+export = { User, OTP, Tool, Video, File, Notification };

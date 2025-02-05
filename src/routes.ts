@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import multer from "multer";
 import {
   forgot_password,
   resend,
@@ -17,13 +18,13 @@ import {
   update_tool,
   upload,
 } from "@controllers/tools";
-import multer from "multer";
 import {
   change_password,
   delete_account,
   profile,
   update_profile,
 } from "@controllers/profile";
+import { notifications } from "@controllers/notifications";
 import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
@@ -52,7 +53,7 @@ export default function (app: Express) {
   app.get("/tools", tools);
 
   // NOTIFICATIONS
-  // app.get("/notifications")
+  app.get("/notifications", notifications);
 
   // WALLET
   // app.get("/withdraw-history")
@@ -73,7 +74,6 @@ export default function (app: Express) {
   // DASHBOARD
   // app.get("/dashboard")
   // app.get("/referral-overview")
-  // app.get("/admin-notifications")
 
   // USER MANAGEMENT
   // app.get("/users")

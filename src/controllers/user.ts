@@ -7,6 +7,7 @@ import { generate } from "otp-generator";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { OTPTypes } from "@services/otpService";
 import { config } from "dotenv";
+import { createNotification } from "@services/notificationService";
 
 config();
 
@@ -83,6 +84,13 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     await DB.OTPModel.create({ email, otp, type: OTPTypes.SIGNUP });
+
+    createNotification({
+      recipientId: newUser?._id?.toString() || "",
+      title: `A user has signed up!`,
+      description: `${name} has signed up with their email: ${email}`,
+      type: "signup",
+    });
 
     res.status(200).json({
       success: true,
@@ -192,6 +200,14 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
+
+    const user = await DB.UserModel.findOne({ email });
+    createNotification({
+      recipientId: user?._id?.toString() || "",
+      title: `A user has verified their email`,
+      description: `${user?.name} has verified their email: ${user?.email}`,
+      type: "user_email_verification",
+    });
 
     res.status(StatusCodes.OK).json({
       message: `Email ${email} verified successfully`,

@@ -13,5 +13,13 @@ const OTPModel = mongoose.model("OTP", Schema.OTP);
 const ToolModel = mongoose.model("Tool", Schema.Tool);
 const VideoModel = mongoose.model("Video", Schema.Video);
 const FileModel = mongoose.model("File", Schema.File);
+const NotificationModel = mongoose.model("Notification", Schema.Notification);
 
-export = { UserModel, OTPModel, ToolModel, VideoModel, FileModel };
+export = {
+  UserModel,
+  OTPModel,
+  ToolModel,
+  VideoModel,
+  FileModel,
+  NotificationModel,
+};

@@ -7,8 +7,6 @@ Improvements:
 - Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
 
 Todos:
-- Build tools tab apis
-- Build profile tab apis
 - Referral commission logic
 
 Bug:
