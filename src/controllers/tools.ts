@@ -82,76 +82,6 @@ const tools = async (req: Request, res: Response): Promise<void> => {
   res.json({ tool });
 };
 
-const upload = async (req: Request, res: Response): Promise<void> => {
-  const { toolId, title } = req?.query || {};
-
-  if (!toolId || !title) {
-    res.status(400).json({ message: "Tool id and title are required" });
-    return;
-  }
-
-  if (!isValidObjectId(toolId)) {
-    res.status(400).json({ message: "Invalid id" });
-    return;
-  }
-
-  const video = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
-    "video"
-  ];
-  const file = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
-    "file"
-  ];
-
-  if (!video && !file) {
-    res.status(400).json({ message: "A Video or a file are required" });
-    return;
-  }
-
-  if (video && file) {
-    res.status(400).json({ message: "Only one video or a file is required" });
-    return;
-  }
-
-  const tool = await DB.ToolModel.findById(toolId);
-
-  if (!tool) {
-    res.status(404).json({ message: "Tool category not found" });
-    return;
-  }
-
-  if (video) {
-    const videoUrl = await uploadService(video[0], "video");
-
-    if (!videoUrl) {
-      res.status(500).json({ message: "Error uploading video" });
-      return;
-    }
-
-    await DB.VideoModel.create({
-      toolId,
-      title,
-      url: videoUrl,
-    });
-  }
-
-  if (file) {
-    const fileUrl = await uploadService(file[0], "raw");
-
-    if (!fileUrl) {
-      res.status(500).json({ message: "Error uploading file" });
-      return;
-    }
-
-    await DB.FileModel.create({
-      toolId,
-      title,
-      url: fileUrl,
-    });
-  }
-
-  res.json({ message: "File uploaded successfully" });
-};
-
 // Category Management
 const add_category = async (req: Request, res: Response): Promise<void> => {
   const { name, icon } = req.body;
@@ -244,7 +174,15 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       if (toolCategories.length > 0) {
         videoQuery.toolId = { $in: toolCategories.map((tool) => tool._id) };
       } else {
-        res.json({ videos: [], pagination: { page: pageNumber, limit: limitNumber, total: 0, totalPages: 0 } });
+        res.json({
+          videos: [],
+          pagination: {
+            page: pageNumber,
+            limit: limitNumber,
+            total: 0,
+            totalPages: 0,
+          },
+        });
         return;
       }
     }
@@ -295,7 +233,15 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       if (toolCategories.length > 0) {
         fileQuery.toolId = { $in: toolCategories.map((tool) => tool._id) };
       } else {
-        res.json({ files: [], pagination: { page: pageNumber, limit: limitNumber, total: 0, totalPages: 0 } });
+        res.json({
+          files: [],
+          pagination: {
+            page: pageNumber,
+            limit: limitNumber,
+            total: 0,
+            totalPages: 0,
+          },
+        });
         return;
       }
     }
@@ -333,6 +279,167 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const upload = async (req: Request, res: Response): Promise<void> => {
+  const { toolId, title } = req?.query || {};
+
+  if (!toolId || !title) {
+    res.status(400).json({ message: "Tool id and title are required" });
+    return;
+  }
+
+  if (!isValidObjectId(toolId)) {
+    res.status(400).json({ message: "Invalid id" });
+    return;
+  }
+
+  const video = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
+    "video"
+  ];
+  const file = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
+    "file"
+  ];
+
+  if (!video && !file) {
+    res
+      .status(400)
+      .json({ message: "At least one Video or one file is required" });
+    return;
+  }
+
+  if (video && file) {
+    res.status(400).json({ message: "Only one video or a file is required" });
+    return;
+  }
+
+  const tool = await DB.ToolModel.findById(toolId);
+
+  if (!tool) {
+    res.status(404).json({ message: "Tool category not found" });
+    return;
+  }
+
+  if (video) {
+    const videoUrl = await uploadService(video[0], "video");
+
+    if (!videoUrl) {
+      res.status(500).json({ message: "Error uploading video" });
+      return;
+    }
+
+    await DB.VideoModel.create({
+      toolId,
+      title,
+      url: videoUrl,
+    });
+  }
+
+  if (file) {
+    const fileUrl = await uploadService(file[0], "raw");
+
+    if (!fileUrl) {
+      res.status(500).json({ message: "Error uploading file" });
+      return;
+    }
+
+    await DB.FileModel.create({
+      toolId,
+      title,
+      url: fileUrl,
+    });
+  }
+
+  res.json({ message: "File uploaded successfully" });
+};
+
+const update_tool = async (req: Request, res: Response): Promise<void> => {
+  const { id, toolId, title, type } = req?.query || {};
+
+  if (!toolId || !title || !id || !type) {
+    res
+      .status(400)
+      .json({ message: "Tool id, title, id and type are required" });
+    return;
+  }
+
+  if (!isValidObjectId(toolId) && !isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid id" });
+    return;
+  }
+
+  const video = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
+    "video"
+  ];
+  const file = (req.files as { [fieldname: string]: Express.Multer.File[] })?.[
+    "file"
+  ];
+
+  if (type === "video" && !video) {
+    res.status(400).json({ message: "Video is required" });
+    return;
+  }
+
+  if (type === "file" && !file) {
+    res.status(400).json({ message: "File is required" });
+    return;
+  }
+
+  const tool = await DB.ToolModel.findById(toolId);
+
+  if (!tool) {
+    res.status(404).json({ message: "Tool category not found" });
+    return;
+  }
+
+  if (type === "video") {
+    const videoFile = await DB.VideoModel.findById(id);
+
+    if (!videoFile) {
+      res.status(404).json({ message: "File not found" });
+      return;
+    }
+
+    const videoUrl = await uploadService(video[0], "video");
+
+    if (!videoUrl) {
+      res.status(500).json({ message: "Error uploading video" });
+      return;
+    }
+
+    await DB.VideoModel.findByIdAndUpdate(id, {
+      toolId,
+      title,
+      url: videoUrl,
+    });
+  }
+
+  if (type === "file") {
+    const fileFromDB = await DB.FileModel.findById(id);
+
+    if (!fileFromDB) {
+      res.status(404).json({ message: "File not found" });
+      return;
+    }
+    const fileUrl = await uploadService(file[0], "raw");
+
+    if (!fileUrl) {
+      res.status(500).json({ message: "Error uploading file" });
+      return;
+    }
+
+    await DB.FileModel.findByIdAndUpdate(id, {
+      toolId,
+      title,
+      url: fileUrl,
+    });
+  }
+
+  res.json({ message: "File updated successfully" });
+};
+
+const delete_tool = async (req: Request, res: Response): Promise<void> => {
+  res.json({ message: "Delete tool" });
+};
+
 export {
   tools,
   upload,
@@ -340,4 +447,6 @@ export {
   update_category,
   delete_category,
   all_tools,
+  update_tool,
+  delete_tool,
 };

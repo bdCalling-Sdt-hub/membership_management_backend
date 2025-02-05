@@ -11,14 +11,20 @@ import {
   add_category,
   all_tools,
   delete_category,
+  delete_tool,
   tools,
   update_category,
+  update_tool,
   upload,
 } from "@controllers/tools";
 import multer from "multer";
 // import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
+const uploadFields = multerUpload.fields([
+  { name: "video", maxCount: 1 },
+  { name: "file", maxCount: 1 },
+]);
 
 export default function (app: Express) {
   // USER AUTH
@@ -63,14 +69,9 @@ export default function (app: Express) {
 
   // TOOLS MANAGEMENT
   app.get("/tools/all", all_tools);
-  const uploadFields = multerUpload.fields([
-    { name: "video", maxCount: 1 },
-    { name: "file", maxCount: 1 },
-  ]);
   app.post("/tools/upload", uploadFields, upload);
-  // app.put("/tools/update_tool", update_tool);
-  // app.delete("/tools/delete_tool", update_tool);
-  // app.delete("/tools/delete_tool", update_tool);
+  app.put("/tools/update_tool", uploadFields, update_tool);
+  app.delete("/tools/delete_tool", delete_tool);
 
   // EARNINGS
   // app.get("/earnings")

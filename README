@@ -9,6 +9,7 @@ Improvements:
 Todos:
 - Build tools tab apis
 - Build profile tab apis
+- Referral commission logic
 
 Bug:
 - tools/upload. after file upload, the secure url doesn't work 
