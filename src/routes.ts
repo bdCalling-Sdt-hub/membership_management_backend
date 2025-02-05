@@ -18,6 +18,12 @@ import {
   upload,
 } from "@controllers/tools";
 import multer from "multer";
+import {
+  change_password,
+  delete_account,
+  profile,
+  update_profile,
+} from "@controllers/profile";
 // import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
@@ -52,9 +58,10 @@ export default function (app: Express) {
   // app.get("/withdraw-history")
 
   // PROFILE
-  // app.get("/profile");
-  // app.put("/update-profile");
-  // app.delete("/delete-account")
+  app.get("/profile", profile);
+  app.put("/update-profile", update_profile);
+  app.delete("/delete-account", delete_account);
+  app.delete("/change-password", change_password);
 
   // ------------------------------
 
