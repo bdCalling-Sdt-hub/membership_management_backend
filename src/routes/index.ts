@@ -1,0 +1,16 @@
+import { Express } from "express";
+import authRoutes from "@routes/auth.routes";
+import toolsRoutes from "@routes/tools.routes";
+import profileRoutes from "@routes/profile.routes";
+import userRoutes from "@routes/user.routes";
+import referralRoutes from "@routes/referral.routes";
+import notificationsRoutes from "@routes/notifications.routes";
+
+export default function registerRoutes(app: Express) {
+  app.use("/auth", authRoutes);
+  app.use("/tools", toolsRoutes);
+  app.use("/profile", profileRoutes);
+  app.use("/users", userRoutes);
+  app.use("/referrals", referralRoutes);
+  app.use("/notifications", notificationsRoutes);
+}

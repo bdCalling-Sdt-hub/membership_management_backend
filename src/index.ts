@@ -2,9 +2,9 @@ require("dotenv").config();
 import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import routes from "./routes";
 import { Server } from "socket.io";
 import http from "http";
+import registerRoutes from "@routes/index";
 
 // config
 const app = express();
@@ -26,7 +26,7 @@ app.use(limiter);
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-routes(app);
+registerRoutes(app);
 // config
 
 const PORT = process.env.PORT || 3000;
