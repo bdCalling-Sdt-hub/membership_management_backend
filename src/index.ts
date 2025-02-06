@@ -4,9 +4,18 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import routes from "./routes";
 import { Server } from "socket.io";
+import http from "http";
 
 // config
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -20,24 +29,27 @@ app.use(express.json());
 routes(app);
 // config
 
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
-);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 server.setTimeout(50000);
 
 // socket.io for notifications
-const io = new Server(server);
-
 io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
 
   socket.on("join", (room) => {
     socket.join(room);
+    console.log(`User ${socket.id} joined room ${room}`);
+  });
+
+  socket.on("leave", (room) => {
+    socket.leave(room);
+    console.log(`User ${socket.id} left room ${room}`);
   });
 
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    console.log("User disconnected:", socket.id);
   });
 });
 

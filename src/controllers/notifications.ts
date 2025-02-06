@@ -9,7 +9,16 @@ const notifications = async (req: Request, res: Response): Promise<void> => {
       .skip((+(page || 1) - 1) * +(limit || 10))
       .limit(+(limit || 10));
 
-    res.status(200).json(notifications);
+    const total = await DB.NotificationModel.countDocuments();
+
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.status(200).json({ notifications, pagination });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
