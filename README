@@ -7,10 +7,11 @@ Improvements:
 - Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
 
 Todos:
+- Stripe Integration
 - Referral commission logic
+- Tools Category: Add Image/Icon upload option
 - Earnings list
 - Withdraw Request list
-- Tools Category: Add Image/Icon upload option
 - Admin and App Dashboards
 
 Bug:
@@ -50,6 +51,7 @@ Done:
   - Mark as read
   - Mark all as read
   - Get unread notification count
+  - Notification event emmiter added
 
 - Users:
   - Get Users

@@ -13,7 +13,13 @@ const User = new Schema({
   dateOfBirth: Date,
   gender: String,
   address: String,
-  referralCode: String,
+
+  // referral stuff
+  referralCode: { type: String, unique: true },
+  referredBy: { type: ObjectId, ref: "User" },
+  referredUsers: [{ type: ObjectId, ref: "User" }],
+  referralEarnings: { type: Number, default: 0 },
+  
   // auth
   passwordHash: { type: String, required: true },
   accountStatus: { type: String, default: "Active", required: true },

@@ -8,6 +8,7 @@ import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { OTPTypes } from "@services/otpService";
 import { config } from "dotenv";
 import eventBus from "@utils/eventBus";
+import { v4 } from "uuid";
 
 config();
 
@@ -47,10 +48,14 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    let referrer = null;
     if (referralCode) {
-      const referrer = await DB.UserModel.findOne({ referralCode }).exec();
+      referrer = await DB.UserModel.findOne({ referralCode }).exec();
       if (!referrer) {
-        res.status(400).json({ message: "Invalid referral code." });
+        res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Invalid referral code.",
+        });
+        return;
       }
     }
 
@@ -60,15 +65,29 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       Number(process.env.SALT_ROUNDS) || 10
     );
 
+    // Generate a unique referral code for the new user
+    let newReferralCode = v4().replace(/-/g, "").slice(0, 10).toUpperCase();
+    while (await DB.UserModel.findOne({ referralCode: newReferralCode })) {
+      newReferralCode = v4().replace(/-/g, "").slice(0, 10).toUpperCase();
+    }
+
     const newUser = new DB.UserModel({
       name,
       email,
       passwordHash,
       accountStatus: "Pending",
-      referralCode,
+      referralCode: newReferralCode,
+      referredBy: referrer ? referrer._id : null,
     });
 
     await newUser.save();
+
+    // If the user has a referrer, update their `referredUsers` array
+    if (referrer) {
+      await DB.UserModel.findByIdAndUpdate(referrer._id, {
+        $push: { referredUsers: newUser._id },
+      });
+    }
 
     // handle otp
     const otpParams = {
