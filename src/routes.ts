@@ -24,13 +24,17 @@ import {
   profile,
   update_profile,
 } from "@controllers/profile";
-import { notifications } from "@controllers/notifications";
-import { isAuthenticated } from "@middleware/auth";
+import {
+  notifications,
+  notifications_by_id,
+  notifications_count,
+} from "@controllers/notifications";
 import { toggle_ban, users } from "@controllers/user";
 import {
   referral_commissions,
   update_referral_commissions,
 } from "@controllers/referral_commissions";
+import { isAuthenticated } from "@middleware/auth";
 
 const multerUpload = multer({ dest: "uploads/" });
 const uploadFields = multerUpload.fields([
@@ -47,21 +51,13 @@ export default function (app: Express) {
   app.post("/update-password", update_password);
   app.post("/sign-in", signin);
 
-  // HOME
-  // app.get("/overview")
-  // - user info
-  // - earnings
-  // - traffic data based on dates
-  // - referral history
-
   // TOOLS
   app.get("/tools", tools);
 
   // NOTIFICATIONS
   app.get("/notifications", notifications);
-
-  // WALLET
-  // app.get("/withdraw-history")
+  app.get("/notifications/:userId", notifications_by_id); // Using a different endpoint for notificationById because of different security levels
+  app.get("/notifications-count/:userId", notifications_count);
 
   // PROFILE
   app.get("/profile", isAuthenticated, profile);
@@ -74,11 +70,17 @@ export default function (app: Express) {
   app.delete("/delete-account", isAuthenticated, delete_account);
   app.post("/change-password", isAuthenticated, change_password);
 
-  // ------------------------------
+  // HOME
+  // app.get("/overview")
+  // - user info
+  // - earnings
+  // - traffic data based on dates
+  // - referral history
 
-  // DASHBOARD
-  // app.get("/dashboard")
-  // app.get("/referral-overview")
+  // WALLET
+  // app.get("/withdraw-history")
+
+  // ------------------------------
 
   // USER MANAGEMENT
   app.get("/users", users);
@@ -90,18 +92,22 @@ export default function (app: Express) {
   app.put("/tools/update_tool", uploadFields, update_tool);
   app.delete("/tools/delete_tool", delete_tool);
 
-  // EARNINGS
-  // app.get("/earnings")
-
-  // WITHDRAW REQUEST
-  // app.get("/withdraw-requests")
+  // TOOLS CATEGORY
+  app.post("/tools/add_category", add_category);
+  app.put("/tools/update_category", update_category);
+  app.delete("/tools/delete_category", delete_category);
 
   // REFERRAL COMMISSION
   app.get("/referral-commissions", referral_commissions);
   app.put("/referral-commissions", update_referral_commissions);
 
-  // TOOLS CATEGORY
-  app.post("/tools/add_category", add_category);
-  app.put("/tools/update_category", update_category);
-  app.delete("/tools/delete_category", delete_category);
+  // DASHBOARD
+  // app.get("/dashboard")
+  // app.get("/referral-overview")
+
+  // EARNINGS
+  // app.get("/earnings")
+
+  // WITHDRAW REQUEST
+  // app.get("/withdraw-requests")
 }
