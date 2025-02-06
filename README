@@ -46,6 +46,10 @@ Done:
 
 - Notifications:
   - Get All Notifications
+  - Get Notifications by User ID
+  - Mark as read
+  - Mark all as read
+  - Get unread notification count
 
 - Users:
   - Get Users

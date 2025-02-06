@@ -2,18 +2,21 @@ import { io } from "src";
 import DB from "src/db";
 
 interface NotificationParams {
-  recipientId: string;
   title: string;
   description: string;
   type: string;
 }
 
-const createNotification = async ({
+interface UserNotificationParams extends NotificationParams {
+  recipientId: string;
+}
+
+const createUserNotification = async ({
   recipientId,
   title,
   description,
   type,
-}: NotificationParams) => {
+}: UserNotificationParams) => {
   try {
     const notification = new DB.NotificationModel({
       recipientId,
@@ -31,4 +34,25 @@ const createNotification = async ({
   }
 };
 
-export { createNotification };
+const createAdminNotification = async ({
+  title,
+  description,
+  type,
+}: NotificationParams) => {
+  try {
+    const notification = new DB.NotificationModel({
+      title,
+      description,
+      type,
+    });
+    await notification.save();
+
+    io.to("admin").emit("admin_notification", notification);
+
+    return notification;
+  } catch (error) {
+    console.log("Error creating notification", error);
+  }
+};
+
+export { createUserNotification, createAdminNotification };
