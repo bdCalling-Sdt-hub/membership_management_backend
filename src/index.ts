@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
 import http from "http";
 import registerRoutes from "@routes/index";
+import "@services/notificationService";
 
 // config
 const app = express();
