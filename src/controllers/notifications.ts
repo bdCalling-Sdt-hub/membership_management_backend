@@ -82,4 +82,45 @@ const notifications_count = async (
   }
 };
 
-export { notifications, notifications_by_id, notifications_count };
+const mark_as_read = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { notificationId } = req?.params || {};
+
+    await DB.NotificationModel.findByIdAndUpdate(notificationId, {
+      isRead: true,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Notification marked as read successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const mark_all_as_read = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req?.params || {};
+
+    await DB.NotificationModel.updateMany(
+      { recipientId: userId },
+      { isRead: true }
+    );
+
+    res
+      .status(200)
+      .json({ message: "All notifications marked as read successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export {
+  notifications,
+  notifications_by_id,
+  notifications_count,
+  mark_as_read,
+  mark_all_as_read,
+};
