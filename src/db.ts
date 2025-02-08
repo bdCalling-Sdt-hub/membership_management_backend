@@ -14,10 +14,8 @@ const ToolModel = mongoose.model("Tool", Schema.Tool);
 const VideoModel = mongoose.model("Video", Schema.Video);
 const FileModel = mongoose.model("File", Schema.File);
 const NotificationModel = mongoose.model("Notification", Schema.Notification);
-const ReferralCommissionModel = mongoose.model(
-  "ReferralCommission",
-  Schema.ReferralCommission
-);
+const ReferralModel = mongoose.model("Referral", Schema.Referral);
+const PaymentModel = mongoose.model("Payment", Schema.Payment);
 
 export = {
   UserModel,
@@ -26,5 +24,6 @@ export = {
   VideoModel,
   FileModel,
   NotificationModel,
-  ReferralCommissionModel,
+  ReferralModel,
+  PaymentModel,
 };

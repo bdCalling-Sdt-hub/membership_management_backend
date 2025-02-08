@@ -2,60 +2,41 @@ import { config } from "dotenv";
 import Stripe from "stripe";
 
 config();
-const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
+const stripePublishableKey = process.env.STRIPE_SECRET_KEY;
 if (!stripePublishableKey) {
   throw new Error(
     "Stripe publishable key is not defined in environment variables"
   );
 }
-const stripe = new Stripe(stripePublishableKey, {
-  apiVersion: "2025-01-27.acacia",
-});
 
-export class StripeService {
-  async createCustomer(email: string, name: string) {
-    try {
-      const customer = await stripe.customers.create({
-        email,
-        name,
-      });
-      return customer;
-    } catch (error) {
-      throw new Error(`Failed to create customer: ${error}`);
-    }
-  }
+export const createCheckoutSession = async ({ userId }: { userId: string }) => {
+  try {
+    const stripe = new Stripe(stripePublishableKey);
 
-  async createCharge(customerId: string, amount: number, currency: string) {
-    try {
-      const charge = await stripe.charges.create({
-        amount,
-        currency,
-        customer: customerId,
-      });
-      return charge;
-    } catch (error) {
-      throw new Error(`Failed to create charge: ${error}`);
-    }
-  }
+    const session = await stripe.checkout.sessions.create({
+      client_reference_id: userId,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Avantra",
+            },
+            unit_amount: 1000,
+            recurring: {
+              interval: "month",
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: "http://localhost:3000/success.html",
+      cancel_url: "http://localhost:3000/cancel.html",
+    });
 
-  async createSubscription(customerId: string, priceId: string) {
-    try {
-      const subscription = await stripe.subscriptions.create({
-        customer: customerId,
-        items: [{ price: priceId }],
-      });
-      return subscription;
-    } catch (error) {
-      throw new Error(`Failed to create subscription: ${error}`);
-    }
+    return session;
+  } catch (error) {
+    return error;
   }
-
-  async retrieveCustomer(customerId: string) {
-    try {
-      const customer = await stripe.customers.retrieve(customerId);
-      return customer;
-    } catch (error) {
-      throw new Error(`Failed to retrieve customer: ${error}`);
-    }
-  }
-}
+};

@@ -4,8 +4,8 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
 import http from "http";
-import registerRoutes from "@routes/index";
 import "@services/notificationService";
+import { registerRoutes, registerRoutesThatNeedsRawBody } from "./routes";
 
 // config
 const app = express();
@@ -25,8 +25,9 @@ const limiter = rateLimit({
 
 app.use(limiter);
 app.use(cors({ origin: "*" }));
-app.use(express.json());
 
+registerRoutesThatNeedsRawBody(app); // have to call this before express.json() to get raw body
+app.use(express.json());
 registerRoutes(app);
 // config
 

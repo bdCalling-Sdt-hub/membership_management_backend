@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import db from "src/db";
+import DB from "src/db";
 
 const referral_commissions = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const referralCommissions = await db.ReferralCommissionModel.find().sort({
+    const referralCommissions = await DB.ReferralModel.find().sort({
       referralLevel: 1,
     });
     res.status(200).json(referralCommissions);
@@ -25,7 +25,7 @@ const update_referral_commissions = async (
   try {
     const { id, levelName, commission } = req.body || {};
 
-    await db.ReferralCommissionModel.findByIdAndUpdate(id, {
+    await DB.ReferralModel.findByIdAndUpdate(id, {
       levelName,
       commission,
     });

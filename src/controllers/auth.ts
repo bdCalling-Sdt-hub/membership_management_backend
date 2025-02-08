@@ -75,7 +75,6 @@ const signup = async (req: Request, res: Response): Promise<void> => {
       name,
       email,
       passwordHash,
-      accountStatus: "Pending",
       referralCode: newReferralCode,
       referredBy: referrer ? referrer._id : null,
     });
@@ -133,7 +132,7 @@ const resend = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    if (existingUser.accountStatus === "Verified") {
+    if (existingUser.emailVerified) {
       res.status(StatusCodes.CONFLICT).json({
         message: `This user is already verified.`,
       });
@@ -196,10 +195,7 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
     // Update user account status
     // even if its not a signup OTP, we can update the account status
     // because the only way to validate OTP is through the email
-    await DB.UserModel.updateOne(
-      { email },
-      { $set: { accountStatus: "Verified" } }
-    );
+    await DB.UserModel.updateOne({ email }, { $set: { emailVerified: true } });
 
     const user = await DB.UserModel.findOne({ email });
     eventBus.emit("email_verified", { userId: user?._id.toString() });
@@ -329,7 +325,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   }
 
   // check if user account is verified
-  if (user[0].accountStatus !== "Verified") {
+  if (!user[0].emailVerified) {
     res.status(403).json({
       message: "Account is not verified. Please verify your email first.",
     });

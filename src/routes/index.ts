@@ -7,12 +7,17 @@ import referralRoutes from "@routes/referral.routes";
 import notificationsRoutes from "@routes/notifications.routes";
 import stripeRoutes from "@routes/stripe.routes";
 
-export default function registerRoutes(app: Express) {
+const registerRoutes = (app: Express) => {
   app.use("/auth", authRoutes);
   app.use("/tools", toolsRoutes);
   app.use("/profile", profileRoutes);
   app.use("/users", userRoutes);
   app.use("/referrals", referralRoutes);
   app.use("/notifications", notificationsRoutes);
+};
+
+const registerRoutesThatNeedsRawBody = (app: Express) => {
   app.use("/stripe", stripeRoutes);
-}
+};
+
+export { registerRoutes, registerRoutesThatNeedsRawBody };

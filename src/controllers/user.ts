@@ -36,11 +36,11 @@ const toggle_ban = async (req: Request, res: Response): Promise<void> => {
       });
     }
 
-    if (user?.accountStatus === "Banned") {
-      await DB.UserModel.findByIdAndUpdate(id, { accountStatus: "Active" });
+    if (user?.isBanned) {
+      await DB.UserModel.findByIdAndUpdate(id, { isBanned: false });
       res.status(200).json({ message: "User unbanned" });
     } else {
-      await DB.UserModel.findByIdAndUpdate(id, { accountStatus: "Banned" });
+      await DB.UserModel.findByIdAndUpdate(id, { isBanned: true });
       res.status(200).json({ message: "User banned" });
     }
   } catch (error) {

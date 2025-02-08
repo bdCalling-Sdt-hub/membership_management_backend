@@ -19,10 +19,20 @@ const User = new Schema({
   referredBy: { type: ObjectId, ref: "User" },
   referredUsers: [{ type: ObjectId, ref: "User" }],
   referralEarnings: { type: Number, default: 0 },
-  
+
   // auth
   passwordHash: { type: String, required: true },
-  accountStatus: { type: String, default: "Active", required: true },
+
+  // account statuses
+  accountStatus: {
+    type: String,
+    default: "active",
+    enum: ["active", "deleted"],
+    required: true,
+  },
+  emailVerified: { type: Boolean, default: false, required: true },
+  isBanned: { type: Boolean, default: false, required: true },
+  isSubscribed: { type: Boolean, default: false, required: true },
 });
 
 const OTP = new Schema({
@@ -63,10 +73,27 @@ const Notification = new Schema({
 });
 
 // Referral Commissions
-const ReferralCommission = new Schema({
+const Referral = new Schema({
   referralLevel: { type: Number, required: true },
   levelName: { type: String, required: true },
   commission: { type: Number, required: true },
 });
 
-export = { User, OTP, Tool, Video, File, Notification, ReferralCommission };
+const Payment = new Schema({
+  userId: { type: ObjectId, ref: "User", required: true },
+  amount: { type: Number, required: true },
+  paymentId: { type: String, required: true },
+  paymentStatus: { type: String, required: true },
+  createdAt: { type: Date, required: true },
+});
+
+export = {
+  User,
+  OTP,
+  Tool,
+  Video,
+  File,
+  Notification,
+  Referral,
+  Payment,
+};
