@@ -1,93 +1,10 @@
-import { createCheckoutSession } from "@services/stripeService";
-import distributeReferralEarnings from "@utils/distributeReferralEarnings";
 import { Request, Response } from "express";
-import { isValidObjectId } from "mongoose";
-import DB from "src/db";
-import Stripe from "stripe";
 
-const create_payment = async (req: Request, res: Response): Promise<void> => {
-  const { userId } = req.body || {};
+const balance = async (req: Request, res: Response): Promise<void> => {};
 
-  if (!isValidObjectId(userId)) {
-    res.status(400).json({
-      message: "User Id Invalid",
-    });
-    return;
-  }
+const withdraw_history = async (
+  req: Request,
+  res: Response
+): Promise<void> => {};
 
-  const user = await DB.UserModel.findById(userId);
-
-  if (!user) {
-    res.status(400).json({
-      message: "User not found",
-    });
-    return;
-  }
-
-  try {
-    const session = (await createCheckoutSession({
-      userId,
-    })) as Stripe.Checkout.Session;
-
-    res.status(200).json({ url: session.url });
-  } catch (error) {
-    console.log(error);
-    res.status(200).json({ message: error });
-  }
-};
-
-const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
-  const webhook_secret = process.env.STRIPE_WEBHOOK_SECRET;
-  const sig = req.headers["stripe-signature"];
-
-  if (!sig) {
-    res.status(500).send("Missing Stripe signature");
-    return;
-  }
-  if (!webhook_secret) {
-    res.status(500).send("Missing Stripe webhook secret");
-    return;
-  }
-  try {
-    const event = Stripe.webhooks.constructEvent(req.body, sig, webhook_secret);
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-
-      if (!session.client_reference_id) {
-        console.log("User ID missing");
-        res.send();
-        return;
-      }
-
-      await DB.PaymentModel.create({
-        amount: (session.amount_total ?? 0) / 100,
-        createdAt: new Date(session.created * 1000),
-        paymentId: session.id,
-        paymentStatus: session.payment_status,
-        userId: session.client_reference_id,
-      });
-
-      await DB.UserModel.findByIdAndUpdate(session.client_reference_id, {
-        isSubscribed: true,
-        subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
-      });
-
-      distributeReferralEarnings(
-        session.client_reference_id,
-        (session.amount_total ?? 0) / 100
-      );
-
-      res.send();
-    } else {
-      console.log(`Unhandled event type ${event.type}`);
-      res.send();
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send(`Webhook Error: ${err}`);
-    return;
-  }
-};
-
-export { create_payment, stripe_webhook };
+export { balance, withdraw_history };

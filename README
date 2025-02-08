@@ -12,6 +12,9 @@ Todos:
 - Earnings list
 - Withdraw Request list
 - Admin and App Dashboards
+- Wallet:
+  - Get balance
+  - Withdraw history
 
 Bug:
 - tools/upload. after file upload, the secure url doesn't work

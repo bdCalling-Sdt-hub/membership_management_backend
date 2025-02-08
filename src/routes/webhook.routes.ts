@@ -1,4 +1,4 @@
-import { stripe_webhook } from "@controllers/payment";
+import { stripe_webhook } from "@controllers/stripe";
 import { Router } from "express";
 import express from "express";
 
