@@ -1,7 +1,7 @@
 import {
   referral_commissions,
   update_referral_commissions,
-} from "@controllers/referral_commissions";
+} from "@controllers/referral";
 import { Router } from "express";
 
 const router = Router();

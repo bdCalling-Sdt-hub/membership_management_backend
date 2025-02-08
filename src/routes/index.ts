@@ -5,6 +5,7 @@ import profileRoutes from "@routes/profile.routes";
 import userRoutes from "@routes/user.routes";
 import referralRoutes from "@routes/referral.routes";
 import notificationsRoutes from "@routes/notifications.routes";
+import stripeRoutes from "@routes/stripe.routes";
 
 export default function registerRoutes(app: Express) {
   app.use("/auth", authRoutes);
@@ -13,4 +14,5 @@ export default function registerRoutes(app: Express) {
   app.use("/users", userRoutes);
   app.use("/referrals", referralRoutes);
   app.use("/notifications", notificationsRoutes);
+  app.use("/stripe", stripeRoutes);
 }
