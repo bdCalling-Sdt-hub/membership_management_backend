@@ -1,4 +1,5 @@
 import { createCheckoutSession } from "@services/stripeService";
+import distributeReferralEarnings from "@utils/distributeReferralEarnings";
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import DB from "src/db";
@@ -52,6 +53,13 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      if (!session.client_reference_id) {
+        console.log("User ID missing");
+        res.send();
+        return;
+      }
+
       await DB.PaymentModel.create({
         amount: (session.amount_total ?? 0) / 100,
         createdAt: new Date(session.created * 1000),
@@ -64,6 +72,11 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
         isSubscribed: true,
         subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
       });
+
+      distributeReferralEarnings(
+        session.client_reference_id,
+        (session.amount_total ?? 0) / 100
+      );
 
       res.send();
     } else {

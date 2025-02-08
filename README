@@ -25,6 +25,7 @@ Done:
   - Resend OTP
   - Validate OTP
   - Update Password
+  - Refresh Token
 
 - Tools:
   - Get Tools
@@ -60,3 +61,8 @@ Done:
 - Referral Commissions:
   - Get Referral Commissions
   - Update Referral Commissions
+  - Referral Commission Distribution
+
+- Stripe:
+  - Create Payment
+  - Webhook
