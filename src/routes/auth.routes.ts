@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   forgot_password,
+  refresh_token,
   resend,
   signin,
   signup,
@@ -16,5 +17,6 @@ router.post("/validate-otp", validate_otp);
 router.post("/forgot-password", forgot_password);
 router.post("/update-password", update_password);
 router.post("/sign-in", signin);
+router.post("/refresh-token", refresh_token);
 
 export default router;

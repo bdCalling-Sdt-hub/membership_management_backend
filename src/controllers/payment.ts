@@ -1,11 +1,27 @@
 import { createCheckoutSession } from "@services/stripeService";
 import { Request, Response } from "express";
+import { isValidObjectId } from "mongoose";
 import DB from "src/db";
 import Stripe from "stripe";
 
 const create_payment = async (req: Request, res: Response): Promise<void> => {
-  // const { userId } = req.body || {};
-  const userId = "67a1fa43a15af2946da7f379";
+  const { userId } = req.body || {};
+
+  if (!isValidObjectId(userId)) {
+    res.status(400).json({
+      message: "User Id Invalid",
+    });
+    return;
+  }
+
+  const user = await DB.UserModel.findById(userId);
+
+  if (!user) {
+    res.status(400).json({
+      message: "User not found",
+    });
+    return;
+  }
 
   try {
     const session = (await createCheckoutSession({
@@ -38,13 +54,16 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
       const session = event.data.object as Stripe.Checkout.Session;
       await DB.PaymentModel.create({
         amount: (session.amount_total ?? 0) / 100,
-        createdAt: session.created,
+        createdAt: new Date(session.created * 1000),
         paymentId: session.id,
         paymentStatus: session.payment_status,
         userId: session.client_reference_id,
       });
 
-      await DB.UserModel.findByIdAndUpdate(session.client_reference_id, { isSubscribed: true })
+      await DB.UserModel.findByIdAndUpdate(session.client_reference_id, {
+        isSubscribed: true,
+        subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
+      });
 
       res.send();
     } else {

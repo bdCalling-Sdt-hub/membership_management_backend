@@ -9,6 +9,7 @@ import { OTPTypes } from "@services/otpService";
 import { config } from "dotenv";
 import eventBus from "@utils/eventBus";
 import { v4 } from "uuid";
+import checkSubscriptionStatus from "@utils/checkSubscriptionStatus";
 
 config();
 
@@ -332,6 +333,9 @@ const signin = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  // check if user account is subscribed
+  checkSubscriptionStatus(user[0]?._id.toString());
+
   // Compare passwords
   const isMatch = await compare(password, user[0].passwordHash);
   if (!isMatch) {
@@ -362,6 +366,48 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+const refresh_token = async (req: Request, res: Response): Promise<void> => {
+  // get jwt from header
+  const jwt = req.headers.authorization?.split(" ")[1];
+
+  // verify jwt
+  if (!jwt) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  const secret = process.env.REFRESH_TOKEN_SECRET;
+  if (!secret) {
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
+  }
+  verify(jwt, secret, async (err, decoded) => {
+    if (err) {
+      res.status(401).json({ message: "Unauthorized" });
+    } else {
+      if (decoded) {
+        checkSubscriptionStatus((decoded as JwtPayload).userId);
+
+        const accessToken = sign(
+          {
+            email: (decoded as JwtPayload).email,
+            userId: (decoded as JwtPayload).userId,
+          },
+          process.env.ACCESS_TOKEN_SECRET || "fallback_secret",
+          { expiresIn: "2m" }
+        );
+
+        res.status(StatusCodes.OK).json({
+          message: "Token refreshed successfully",
+          accessToken,
+        });
+      } else {
+        res.status(401).json({ message: "Unauthorized" });
+      }
+    }
+  });
+};
+
 export {
   signup,
   resend,
@@ -369,4 +415,5 @@ export {
   forgot_password,
   update_password,
   signin,
+  refresh_token,
 };

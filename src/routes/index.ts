@@ -6,6 +6,7 @@ import userRoutes from "@routes/user.routes";
 import referralRoutes from "@routes/referral.routes";
 import notificationsRoutes from "@routes/notifications.routes";
 import stripeRoutes from "@routes/stripe.routes";
+import webhookRoutes from "@routes/webhook.routes";
 
 const registerRoutes = (app: Express) => {
   app.use("/auth", authRoutes);
@@ -14,10 +15,11 @@ const registerRoutes = (app: Express) => {
   app.use("/users", userRoutes);
   app.use("/referrals", referralRoutes);
   app.use("/notifications", notificationsRoutes);
+  app.use("/stripe", stripeRoutes);
 };
 
 const registerRoutesThatNeedsRawBody = (app: Express) => {
-  app.use("/stripe", stripeRoutes);
+  app.use("/webhook", webhookRoutes);
 };
 
 export { registerRoutes, registerRoutesThatNeedsRawBody };

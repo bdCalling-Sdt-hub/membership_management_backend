@@ -33,6 +33,7 @@ const User = new Schema({
   emailVerified: { type: Boolean, default: false, required: true },
   isBanned: { type: Boolean, default: false, required: true },
   isSubscribed: { type: Boolean, default: false, required: true },
+  subscriptionExpiry: { type: Date },
 });
 
 const OTP = new Schema({
