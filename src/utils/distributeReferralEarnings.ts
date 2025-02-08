@@ -9,20 +9,25 @@ export default async function distributeReferralEarnings(
   if (!user) return;
 
   let referrer = user.referredBy;
-  let level: number = 1;
-  const commissionRates: { [key: number]: number } = {
-    1: 0.5,
-    2: 0.1,
-    3: 0.05,
-  };
+  let level = 1;
+
+  // Fetch commission rates from DB and create a mapping
+  const commissionRatesFromDB = await DB.ReferralModel.find();
+  const commissionRates: { [key: number]: number } = {};
+
+  commissionRatesFromDB.forEach((rate) => {
+    commissionRates[rate.referralLevel] = rate.commission / 100;
+  });
 
   while (referrer && level <= 3) {
-    const commission = amount * commissionRates[level];
+    if (commissionRates[level]) {
+      const commission = amount * commissionRates[level];
 
-    // Update referrer's earnings
-    await DB.UserModel.findByIdAndUpdate(referrer._id, {
-      $inc: { referralEarnings: commission },
-    });
+      // Update referrer's earnings
+      await DB.UserModel.findByIdAndUpdate(referrer._id, {
+        $inc: { referralEarnings: commission },
+      });
+    }
 
     // Move to the next level referrer
     referrer = (await DB.UserModel.findById(referrer).populate("referredBy"))
