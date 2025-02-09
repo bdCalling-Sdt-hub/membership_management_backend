@@ -40,3 +40,23 @@ export const createCheckoutSession = async ({ userId }: { userId: string }) => {
     return error;
   }
 };
+
+export const createStripeConnectExpressAccount = async (email: string) => {
+  try {
+    const stripe = new Stripe(stripePublishableKey);
+
+    // Create an Express Account for the user
+    const account = await stripe.accounts.create({
+      type: "express",
+      email,
+      capabilities: {
+        transfers: { requested: true },
+      },
+    });
+
+    return { success: true, accountId: account.id };
+  } catch (error) {
+    console.error("Error creating Stripe Connect account:", error);
+    return { success: false, error };
+  }
+};

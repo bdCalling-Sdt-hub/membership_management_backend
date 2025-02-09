@@ -20,6 +20,9 @@ const User = new Schema({
   referredUsers: [{ type: ObjectId, ref: "User" }],
   referralEarnings: { type: Number, default: 0 },
 
+  // stripe stuff
+  stripeAccountId: { type: String },
+
   // auth
   passwordHash: { type: String, required: true },
 

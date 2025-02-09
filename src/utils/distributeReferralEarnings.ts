@@ -1,14 +1,15 @@
+import { createStripeConnectExpressAccount } from "@services/stripeService";
 import DB from "src/db";
 
 export default async function distributeReferralEarnings(
   userId: string,
   amount: number
 ) {
-  const user = await DB.UserModel.findById(userId).populate("referredBy");
+  const user = await DB.UserModel.findById(userId);
 
   if (!user) return;
 
-  let referrer = user.referredBy;
+  let referrer = await DB.UserModel.findById(user.referredBy);
   let level = 1;
 
   // Fetch commission rates from DB and create a mapping
@@ -23,15 +24,37 @@ export default async function distributeReferralEarnings(
     if (commissionRates[level]) {
       const commission = amount * commissionRates[level];
 
+      // Ensure Stripe Connect account creation is completed first
+      if (!referrer.stripeAccountId) {
+        const stripeAccount = await createStripeConnectExpressAccount(
+          referrer.email
+        );
+
+        if (stripeAccount.success) {
+          // Save the Stripe Account ID in the database
+          await DB.UserModel.findByIdAndUpdate(referrer._id, {
+            stripeAccountId: stripeAccount.accountId,
+          });
+        } else {
+          console.error(
+            "Failed to create Stripe Connect account for",
+            referrer._id
+          );
+        }
+      }
+
       // Update referrer's earnings
       await DB.UserModel.findByIdAndUpdate(referrer._id, {
         $inc: { referralEarnings: commission },
       });
     }
 
-    // Move to the next level referrer
-    referrer = (await DB.UserModel.findById(referrer).populate("referredBy"))
-      ?.referredBy;
+    // Move to the next level referrer, check if referredBy exists
+    if (referrer.referredBy) {
+      referrer = await DB.UserModel.findById(referrer.referredBy);
+    } else {
+      break; // Exit loop if there are no more referrers
+    }
     level++;
   }
 }

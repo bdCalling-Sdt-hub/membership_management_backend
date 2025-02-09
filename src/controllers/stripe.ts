@@ -5,6 +5,7 @@ import { isValidObjectId } from "mongoose";
 import DB from "src/db";
 import Stripe from "stripe";
 
+// subscription
 const create_payment = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.body || {};
 
@@ -73,6 +74,7 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
         subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
       });
 
+      // distribute referral commissions to refferers
       distributeReferralEarnings(
         session.client_reference_id,
         (session.amount_total ?? 0) / 100
