@@ -1,4 +1,8 @@
-import { createCheckoutSession } from "@services/stripeService";
+import {
+  createCheckoutSession,
+  getOnboardingLink,
+  transferToConnectedAccount,
+} from "@services/stripeService";
 import distributeReferralEarnings from "@utils/distributeReferralEarnings";
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
@@ -92,4 +96,36 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { create_payment, stripe_webhook };
+// stripe connect
+const account_link = async (req: Request, res: Response): Promise<void> => {
+  const { accountId } = req.body || {};
+
+  try {
+    const onboardingLink = await getOnboardingLink(accountId);
+    res.status(200).json(onboardingLink);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const transfer_funds = async (req: Request, res: Response): Promise<void> => {
+  const { amountInCents, destinationAccountId } = req.body || {};
+
+  try {
+    const transferResponse = await transferToConnectedAccount({
+      amountInCents,
+      destinationAccountId,
+    });
+    res.status(200).json(transferResponse);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export { create_payment, stripe_webhook, account_link, transfer_funds };

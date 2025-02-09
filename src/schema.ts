@@ -22,6 +22,7 @@ const User = new Schema({
 
   // stripe stuff
   stripeAccountId: { type: String },
+  stripeOnboardingDone: { type: Boolean, default: false },
 
   // auth
   passwordHash: { type: String, required: true },

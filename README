@@ -7,7 +7,7 @@ Improvements:
 - Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
 
 Todos:
-- Stripe Connect Integration
+- Test Stripe Connect Transfers
 - Tools Category: Add Image/Icon upload option
 - Earnings list
 - Withdraw Request list
@@ -67,4 +67,6 @@ Done:
 
 - Stripe:
   - Create Payment
-  - Webhook
+  - Webhook for Payment events
+  - Create connected accounts
+  - Create onboarding link for connected accounts

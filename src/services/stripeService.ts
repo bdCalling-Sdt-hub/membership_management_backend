@@ -2,16 +2,18 @@ import { config } from "dotenv";
 import Stripe from "stripe";
 
 config();
-const stripePublishableKey = process.env.STRIPE_SECRET_KEY;
-if (!stripePublishableKey) {
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeSecretKey) {
   throw new Error(
-    "Stripe publishable key is not defined in environment variables"
+    "Stripe secret key is not defined in environment variables"
   );
 }
 
 export const createCheckoutSession = async ({ userId }: { userId: string }) => {
   try {
-    const stripe = new Stripe(stripePublishableKey);
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2025-01-27.acacia",
+    });
 
     const session = await stripe.checkout.sessions.create({
       client_reference_id: userId,
@@ -43,7 +45,9 @@ export const createCheckoutSession = async ({ userId }: { userId: string }) => {
 
 export const createStripeConnectExpressAccount = async (email: string) => {
   try {
-    const stripe = new Stripe(stripePublishableKey);
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2025-01-27.acacia",
+    });
 
     // Create an Express Account for the user
     const account = await stripe.accounts.create({
@@ -57,6 +61,51 @@ export const createStripeConnectExpressAccount = async (email: string) => {
     return { success: true, accountId: account.id };
   } catch (error) {
     console.error("Error creating Stripe Connect account:", error);
+    return { success: false, error };
+  }
+};
+
+export const getOnboardingLink = async (accountId: string) => {
+  try {
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2025-01-27.acacia",
+    });
+
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: "http://localhost:3000/reauth",
+      return_url: "http://localhost:3000/onboarding-success",
+      type: "account_onboarding",
+    });
+
+    return { success: true, url: accountLink.url };
+  } catch (error) {
+    console.error("Error creating onboarding link:", error);
+    return { success: false, error };
+  }
+};
+
+export const transferToConnectedAccount = async ({
+  amountInCents,
+  destinationAccountId,
+}: {
+  amountInCents: number;
+  destinationAccountId: string;
+}) => {
+  try {
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2025-01-27.acacia",
+    });
+
+    const transfer = await stripe.transfers.create({
+      amount: amountInCents, // Amount in cents
+      currency: "usd",
+      destination: destinationAccountId, // User's Stripe Connect Account ID
+    });
+
+    return { success: true, transfer };
+  } catch (error) {
+    console.error("Error transferring funds:", error);
     return { success: false, error };
   }
 };
