@@ -3,3 +3,4 @@ tools
 *.ts.old
 .env
 uploads
+dist
