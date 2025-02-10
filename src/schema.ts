@@ -48,7 +48,6 @@ const OTP = new Schema({
   type: { type: String, required: true },
 });
 
-// Tools tab
 const Video = new Schema({
   toolId: { type: ObjectId, required: true },
   title: { type: String, required: true },
@@ -68,7 +67,6 @@ const Tool = new Schema({
   icon: { type: String, required: true },
 });
 
-// Notifcations tab
 const Notification = new Schema({
   createdAt: { type: Date, default: Date.now },
   recipientId: { type: ObjectId, ref: "User" },
@@ -78,7 +76,6 @@ const Notification = new Schema({
   isRead: { type: Boolean, default: false, required: true },
 });
 
-// Referral Commissions
 const Referral = new Schema({
   referralLevel: { type: Number, required: true },
   levelName: { type: String, required: true },
@@ -93,6 +90,18 @@ const Payment = new Schema({
   createdAt: { type: Date, required: true },
 });
 
+const Withdrawal = new Schema({
+  requesterId: { type: ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: new Date(), required: true },
+  amount: { type: Number, default: 0, required: true },
+  status: {
+    type: String,
+    default: "pending",
+    enum: ["approved", "rejected", "pending", "failed"],
+    required: true,
+  },
+});
+
 export = {
   User,
   OTP,
@@ -102,4 +111,5 @@ export = {
   Notification,
   Referral,
   Payment,
+  Withdrawal,
 };

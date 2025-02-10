@@ -8,6 +8,7 @@ import notificationsRoutes from "@routes/notifications.routes";
 import stripeRoutes from "@routes/stripe.routes";
 import webhookRoutes from "@routes/webhook.routes";
 import dashboardRoutes from "@routes/dashboard.routes";
+import paymentRoutes from "@routes/payment.routes";
 
 const registerRoutes = (app: Express) => {
   app.use("/auth", authRoutes);
@@ -18,6 +19,7 @@ const registerRoutes = (app: Express) => {
   app.use("/notifications", notificationsRoutes);
   app.use("/stripe", stripeRoutes);
   app.use("/dashboard", dashboardRoutes);
+  app.use("/payment", paymentRoutes);
 };
 
 const registerRoutesThatNeedsRawBody = (app: Express) => {

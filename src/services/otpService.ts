@@ -1,4 +1,3 @@
-// src/services/otpService.ts
 import { sendEmail } from "@services/emailService";
 import Schema from "src/schema";
 

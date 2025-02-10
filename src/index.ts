@@ -5,7 +5,7 @@ import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
 import http from "http";
 import "@services/notificationService";
-import { registerRoutes, registerRoutesThatNeedsRawBody } from "./routes";
+import { registerRoutes, registerRoutesThatNeedsRawBody } from "@routes/index";
 
 // config
 const app = express();
@@ -34,7 +34,7 @@ registerRoutes(app);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-server.setTimeout(50000);
+server.setTimeout(60000); // 1 Minute
 
 // socket.io for notifications
 io.on("connection", (socket) => {

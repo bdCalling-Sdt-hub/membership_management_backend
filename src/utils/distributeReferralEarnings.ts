@@ -45,7 +45,7 @@ export default async function distributeReferralEarnings(
 
       // Update referrer's earnings
       await DB.UserModel.findByIdAndUpdate(referrer._id, {
-        $inc: { referralEarnings: commission },
+        $inc: { referralEarnings: commission, balance: commission },
       });
     }
 
