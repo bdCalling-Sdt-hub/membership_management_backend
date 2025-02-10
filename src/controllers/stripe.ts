@@ -85,6 +85,14 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
       );
 
       res.send();
+    } else if (event.type === "account.external_account.created") {
+      await DB.UserModel.findOneAndUpdate(
+        { stripeAccountId: event.account },
+        {
+          stripeOnboardingDone: true,
+        }
+      );
+      res.send();
     } else {
       console.log(`Unhandled event type ${event.type}`);
       res.send();

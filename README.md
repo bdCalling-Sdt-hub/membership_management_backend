@@ -66,8 +66,6 @@ To build and deploy this project
 ## Roadmap
 
 Todos:
-- Earnings list
-- Update stripeOnboardingDone
 - Tools Category: Add Image/Icon upload option
 - Admin Dashboard
 - Terms & Conditions and Privacy Policy APIs
