@@ -174,6 +174,9 @@ const update_withdraw_requests = async (
         return;
       }
 
+      await DB.UserModel.findByIdAndUpdate(withdraw.requesterId, {
+        $inc: { balance: -withdraw.amount },
+      });
       await DB.WithdrawalModel.findByIdAndUpdate(withdraw_id, {
         status,
         stripeResponse: stripeTransfer,
