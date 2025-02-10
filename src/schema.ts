@@ -18,7 +18,8 @@ const User = new Schema({
   referralCode: { type: String, unique: true },
   referredBy: { type: ObjectId, ref: "User" },
   referredUsers: [{ type: ObjectId, ref: "User" }],
-  referralEarnings: { type: Number, default: 0 },
+  referralEarnings: { type: Number, default: 0 }, // All time earnings
+  balance: { type: Number, default: 0 }, // Current balance, after withdrawals/topups
 
   // stripe stuff
   stripeAccountId: { type: String },

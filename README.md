@@ -74,13 +74,11 @@ Improvements:
 - Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
 
 Todos:
-
-- Referral History
 - Test Stripe Connect Transfers
 - Tools Category: Add Image/Icon upload option
 - Earnings list
 - Withdraw Request list
-- Admin and App Dashboards
+- Admin Dashboard
 - Wallet:
   - Get balance
   - Withdraw history

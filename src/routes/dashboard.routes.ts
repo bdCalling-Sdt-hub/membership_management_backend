@@ -4,7 +4,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.get("/", overview);
+router.get("/", isAuthenticated, overview);
 router.get("/referral-history", isAuthenticated, referral_history);
 
 export default router;
