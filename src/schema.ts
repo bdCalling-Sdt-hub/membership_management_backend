@@ -93,6 +93,8 @@ const Payment = new Schema({
 const Withdrawal = new Schema({
   requesterId: { type: ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: new Date(), required: true },
+  transactionId: { type: String, required: true },
+  stripeAccountId: { type: String, required: true },
   amount: { type: Number, default: 0, required: true },
   status: {
     type: String,
@@ -100,6 +102,7 @@ const Withdrawal = new Schema({
     enum: ["approved", "rejected", "pending", "failed"],
     required: true,
   },
+  stripeResponse: { type: Object },
 });
 
 export = {

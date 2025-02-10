@@ -82,6 +82,7 @@ Todos:
 - Wallet:
   - Get balance
   - Withdraw history
+- Terms & Conditions and Privacy Policy APIs
 
 Bug:
 
