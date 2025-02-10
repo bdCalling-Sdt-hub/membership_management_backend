@@ -203,10 +203,43 @@ const update_withdraw_requests = async (
   }
 };
 
+const earnings = async (req: Request, res: Response): Promise<void> => {
+  const { page, limit } = req.query || {};
+
+  const usersFromDB = await DB.UserModel.find()
+    .sort({ createdAt: -1 })
+    .skip((+(page || 1) - 1) * +(limit || 10))
+    .limit(+(limit || 10));
+
+  const users = usersFromDB.map(
+    ({ _id, name, photoUrl, subscriptionExpiry, isSubscribed }) => ({
+      _id,
+      name,
+      photoUrl,
+      date_and_time: subscriptionExpiry
+        ? new Date(Number(subscriptionExpiry) - 30 * 24 * 60 * 60 * 1000)
+        : null,
+      status: isSubscribed ? "paid" : "unpaid",
+    })
+  );
+
+  const total = await DB.UserModel.countDocuments();
+
+  const pagination = {
+    page: +(page || 1),
+    limit: +(limit || 10),
+    total,
+    totalPages: Math.ceil(total / +(limit || 10)),
+  };
+
+  res.status(200).json({ users, pagination });
+};
+
 export {
   balance,
   request_withdrawal,
   withdraw_history,
   withdraw_requests,
   update_withdraw_requests,
+  earnings,
 };

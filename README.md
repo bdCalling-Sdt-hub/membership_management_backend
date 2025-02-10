@@ -65,28 +65,24 @@ To build and deploy this project
 
 ## Roadmap
 
-Clean Up:
-
-- Remove otp from responses. src/controllers/user.ts
-
-Improvements:
-
-- Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
-
 Todos:
-- Test Stripe Connect Transfers
-- Tools Category: Add Image/Icon upload option
 - Earnings list
-- Withdraw Request list
+- Update stripeOnboardingDone
+- Tools Category: Add Image/Icon upload option
 - Admin Dashboard
-- Wallet:
-  - Get balance
-  - Withdraw history
 - Terms & Conditions and Privacy Policy APIs
 
 Bug:
-
 - tools/upload. after file upload, the secure url doesn't work
+
+Clean Up:
+- Remove otp from responses. src/controllers/user.ts
+
+Improvements:
+- Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
+
+Do Later:
+- Test Stripe Connect Transfers
 
 ## Authors
 

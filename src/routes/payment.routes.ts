@@ -1,5 +1,6 @@
 import {
   balance,
+  earnings,
   request_withdrawal,
   update_withdraw_requests,
   withdraw_history,
@@ -17,5 +18,6 @@ router.get("/withdraw-history", isAuthenticated, withdraw_history);
 // admin
 router.get("/withdraw-requests", isAuthenticated, withdraw_requests);
 router.post("/update-withdraw-requests", update_withdraw_requests);
+router.get("/earnings", earnings);
 
 export default router;
