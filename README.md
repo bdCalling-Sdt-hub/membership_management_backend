@@ -67,7 +67,7 @@ To build and deploy this project
 
 Todos:
 - Admin Dashboard
-- Terms & Conditions and Privacy Policy APIs
+- api auth (admin and client routes)
 
 Bug:
 - tools/upload. after file upload, the secure url doesn't work

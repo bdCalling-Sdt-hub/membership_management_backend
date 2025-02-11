@@ -9,6 +9,7 @@ import stripeRoutes from "@routes/stripe.routes";
 import webhookRoutes from "@routes/webhook.routes";
 import dashboardRoutes from "@routes/dashboard.routes";
 import paymentRoutes from "@routes/payment.routes";
+import legalRoutes from "@routes/legal.routes";
 
 const registerRoutes = (app: Express) => {
   app.use("/auth", authRoutes);
@@ -20,6 +21,7 @@ const registerRoutes = (app: Express) => {
   app.use("/stripe", stripeRoutes);
   app.use("/dashboard", dashboardRoutes);
   app.use("/payment", paymentRoutes);
+  app.use("/legal", legalRoutes);
 };
 
 const registerRoutesThatNeedsRawBody = (app: Express) => {

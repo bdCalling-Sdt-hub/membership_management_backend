@@ -17,6 +17,7 @@ const NotificationModel = mongoose.model("Notification", Schema.Notification);
 const ReferralModel = mongoose.model("Referral", Schema.Referral);
 const PaymentModel = mongoose.model("Payment", Schema.Payment);
 const WithdrawalModel = mongoose.model("Withdrawal", Schema.Withdrawal);
+const LegalModel = mongoose.model("Legal", Schema.Legal);
 
 export = {
   UserModel,
@@ -28,4 +29,5 @@ export = {
   ReferralModel,
   PaymentModel,
   WithdrawalModel,
+  LegalModel,
 };

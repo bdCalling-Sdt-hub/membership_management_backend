@@ -105,6 +105,22 @@ const Withdrawal = new Schema({
   stripeResponse: { type: Object },
 });
 
+const Legal = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ["privacy_policy", "terms_conditions"],
+      required: true,
+      unique: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
 export = {
   User,
   OTP,
@@ -115,4 +131,5 @@ export = {
   Referral,
   Payment,
   Withdrawal,
+  Legal,
 };
