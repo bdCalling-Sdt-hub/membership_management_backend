@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import {
+  access_file,
   add_category,
   all_tools,
   delete_category,
@@ -21,6 +22,7 @@ const uploadFields = multerUpload.fields([
 
 // Tools
 router.get("/", tools);
+router.get("/access-file/:id", access_file);
 
 // Tool Management
 router.get("/all", all_tools);

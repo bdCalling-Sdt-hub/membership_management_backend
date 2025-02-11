@@ -1,7 +1,11 @@
 import uploadService from "@services/uploadService";
+import handleFileResponse from "@utils/handleFIleResponse";
+import { config } from "dotenv";
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import DB from "src/db";
+
+config();
 
 // Todo
 // upload video and file
@@ -60,7 +64,11 @@ const tools = async (req: Request, res: Response): Promise<void> => {
 
     const files = await DB.FileModel.find({ toolId: id }, { __v: 0 }).limit(10);
 
-    res.json({ tool, videos, files });
+    res.json({
+      tool,
+      videos: handleFileResponse(videos),
+      files: handleFileResponse(files),
+    });
     return;
   }
 
@@ -77,7 +85,7 @@ const tools = async (req: Request, res: Response): Promise<void> => {
       totalPages: Math.ceil(total / +(limit || 10)),
     };
 
-    res.json({ tool, videos, pagination });
+    res.json({ tool, videos: handleFileResponse(videos), pagination });
     return;
   }
 
@@ -94,13 +102,49 @@ const tools = async (req: Request, res: Response): Promise<void> => {
       totalPages: Math.ceil(total / +(limit || 10)),
     };
 
-    res.json({ tool, files, pagination });
+    res.json({ tool, files: handleFileResponse(files), pagination });
     return;
   }
 
   res.json({ tool });
 };
 
+const access_file = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid ID" });
+      return;
+    }
+
+    const video = await DB.VideoModel.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    if (video) {
+      res.redirect(video.url);
+      return;
+    }
+
+    const file = await DB.FileModel.findByIdAndUpdate(
+      id,
+      { $inc: { downloads: 1 } },
+      { new: true }
+    );
+
+    if (file) {
+      res.redirect(file.url);
+      return;
+    }
+
+    res.status(404).json({ message: "File not found" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
 // Category Management
 const add_category = async (req: Request, res: Response): Promise<void> => {
   const { name } = req.body;
@@ -513,6 +557,7 @@ const delete_tool = async (req: Request, res: Response): Promise<void> => {
 
 export {
   tools,
+  access_file,
   upload,
   add_category,
   update_category,

@@ -16,6 +16,7 @@ To run this project, you will need to add the following environment variables to
 
 #### Server
 
+`BASE_URL`
 `PORT`
 
 #### Auth
@@ -66,13 +67,9 @@ To build and deploy this project
 ## Roadmap
 
 Todos:
-- add views counter for tool videos
 - add notification event triggers
 - api auth (admin and client routes)
 - Admin Dashboard
-
-Bug:
-- tools/upload. after file upload, the secure url doesn't work
 
 Clean Up:
 - Remove otp from responses. src/controllers/user.ts
