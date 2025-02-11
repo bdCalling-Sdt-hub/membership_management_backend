@@ -66,7 +66,6 @@ To build and deploy this project
 ## Roadmap
 
 Todos:
-- Tools Category: Add Image/Icon upload option
 - Admin Dashboard
 - Terms & Conditions and Privacy Policy APIs
 

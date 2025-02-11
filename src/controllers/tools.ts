@@ -84,14 +84,22 @@ const tools = async (req: Request, res: Response): Promise<void> => {
 
 // Category Management
 const add_category = async (req: Request, res: Response): Promise<void> => {
-  const { name, icon } = req.body;
+  const { name } = req.body;
+  const icon = req.file;
 
   if (!name || !icon) {
     res.status(400).json({ error: "Name and icon are required" });
     return;
   }
 
-  await DB.ToolModel.create({ name, icon });
+  const iconUrl = await uploadService(icon, "image");
+
+  if (!iconUrl) {
+    res.status(500).json({ message: "Error uploading photo" });
+    return;
+  }
+
+  await DB.ToolModel.create({ name, icon: iconUrl });
 
   res.json({
     message: "Category added successfully",
@@ -99,19 +107,33 @@ const add_category = async (req: Request, res: Response): Promise<void> => {
 };
 
 const update_category = async (req: Request, res: Response): Promise<void> => {
-  const { id, name, icon } = req.body;
+  const { id, name } = req.body;
+  const icon = req.file;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ message: "Invalid id" });
     return;
   }
 
-  if (!name || !icon) {
-    res.status(400).json({ error: "Name and icon are required" });
+  if (!name && !icon) {
+    res.status(400).json({ error: "Name or icon is required" });
     return;
   }
 
-  const tool = await DB.ToolModel.findByIdAndUpdate(id, { name, icon });
+  const update = { name } as any;
+
+  if (icon) {
+    const iconUrl = await uploadService(icon, "image");
+
+    if (!iconUrl) {
+      res.status(500).json({ message: "Error uploading photo" });
+      return;
+    }
+
+    update.icon = iconUrl;
+  }
+
+  const tool = await DB.ToolModel.findByIdAndUpdate(id, update);
 
   if (!tool) {
     res.status(404).json({ message: "Tool category not found" });

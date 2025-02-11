@@ -29,8 +29,8 @@ router.put("/update_tool", uploadFields, update_tool);
 router.delete("/delete_tool", delete_tool);
 
 // Tool Categories
-router.post("/add_category", add_category);
-router.put("/update_category", update_category);
+router.post("/add_category", multerUpload.single("icon"), add_category);
+router.put("/update_category", multerUpload.single("icon"), update_category);
 router.delete("/delete_category", delete_category);
 
 export default router;
