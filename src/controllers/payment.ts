@@ -107,14 +107,35 @@ const withdraw_requests = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { page, limit } = req.query || {};
+  const { page, limit, query } = req.query || {};
 
-  const withdraw_requests = await DB.WithdrawalModel.find({}, { __v: 0 })
+  const searchQuery: any = {};
+
+  if (query) {
+    // Find users matching the search term
+    const users = await DB.UserModel.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } }, // Search by name (case-insensitive)
+        { email: { $regex: query, $options: "i" } }, // Search by email
+      ],
+    }).select("_id");
+
+    // Extract matching user IDs
+    const matchingUserIds = users.map((user) => user._id);
+
+    // Filter withdraw requests by matching requesterId
+    searchQuery.requesterId = { $in: matchingUserIds };
+  }
+
+  const withdraw_requests = await DB.WithdrawalModel.find(searchQuery, {
+    __v: 0,
+  })
+    .populate("requesterId", "name email photoUrl")
     .sort({ createdAt: -1 })
     .skip((+(page || 1) - 1) * +(limit || 10))
     .limit(+(limit || 10));
 
-  const total = await DB.WithdrawalModel.countDocuments();
+  const total = await DB.WithdrawalModel.countDocuments(searchQuery);
 
   const pagination = {
     page: +(page || 1),
@@ -204,9 +225,15 @@ const update_withdraw_requests = async (
 };
 
 const earnings = async (req: Request, res: Response): Promise<void> => {
-  const { page, limit } = req.query || {};
+  const { page, limit, query } = req.query || {};
 
-  const usersFromDB = await DB.UserModel.find()
+  const searchQuery = query
+    ? {
+        $or: [{ name: { $regex: query, $options: "i" } }],
+      }
+    : {};
+
+  const usersFromDB = await DB.UserModel.find(searchQuery)
     .sort({ createdAt: -1 })
     .skip((+(page || 1) - 1) * +(limit || 10))
     .limit(+(limit || 10));
@@ -223,7 +250,7 @@ const earnings = async (req: Request, res: Response): Promise<void> => {
     })
   );
 
-  const total = await DB.UserModel.countDocuments();
+  const total = await DB.UserModel.countDocuments(searchQuery);
 
   const pagination = {
     page: +(page || 1),

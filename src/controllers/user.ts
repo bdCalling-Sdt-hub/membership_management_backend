@@ -3,19 +3,32 @@ import DB from "src/db";
 
 const users = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { page, limit } = req?.query || {};
+    const { page, limit, query } = req?.query || {};
+    const searchQuery = query
+      ? {
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { email: { $regex: query, $options: "i" } },
+          ],
+        }
+      : {};
 
-    const users = await DB.UserModel.find(
-      {},
-      {
-        __v: 0,
-        passwordHash: 0,
-      }
-    )
+    const users = await DB.UserModel.find(searchQuery, {
+      __v: 0,
+      passwordHash: 0,
+    })
       .skip((+(page || 1) - 1) * +(limit || 10))
       .limit(+(limit || 10));
 
-    res.status(200).json(users);
+    const total = await DB.UserModel.countDocuments(searchQuery);
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.status(200).json({ users, pagination });
   } catch (error) {
     console.log(error);
     res.status(500).json({

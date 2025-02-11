@@ -8,11 +8,32 @@ import DB from "src/db";
 // get video and file by category with pagination
 
 const tools = async (req: Request, res: Response): Promise<void> => {
-  const { id, type, page, limit } = req.query;
+  const { id, type, page, limit, query } = req.query;
 
   if (!id) {
-    const tools = await DB.ToolModel.find({}, { id: 1, name: 1, icon: 1 });
-    res.json(tools);
+    const searchQuery = query
+      ? {
+          $or: [{ name: { $regex: query, $options: "i" } }],
+        }
+      : {};
+
+    const tools = await DB.ToolModel.find(searchQuery, {
+      id: 1,
+      name: 1,
+      icon: 1,
+    })
+      .skip((+(page || 1) - 1) * +(limit || 10))
+      .limit(+(limit || 10));
+
+    const total = await DB.ToolModel.countDocuments(searchQuery);
+    const pagination = {
+      page: +(page || 1),
+      limit: +(limit || 10),
+      total,
+      totalPages: Math.ceil(total / +(limit || 10)),
+    };
+
+    res.json({ tools, pagination });
     return;
   }
 
@@ -33,13 +54,11 @@ const tools = async (req: Request, res: Response): Promise<void> => {
   }
 
   if (!type) {
-    const videos = await DB.VideoModel.find({ toolId: id }, { __v: 0 })
-      .skip((+(page || 1) - 1) * +(limit || 10))
-      .limit(+(limit || 10));
+    const videos = await DB.VideoModel.find({ toolId: id }, { __v: 0 }).limit(
+      10
+    );
 
-    const files = await DB.FileModel.find({ toolId: id }, { __v: 0 })
-      .skip((+(page || 1) - 1) * +(limit || 10))
-      .limit(+(limit || 10));
+    const files = await DB.FileModel.find({ toolId: id }, { __v: 0 }).limit(10);
 
     res.json({ tool, videos, files });
     return;

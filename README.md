@@ -66,8 +66,10 @@ To build and deploy this project
 ## Roadmap
 
 Todos:
-- Admin Dashboard
+- add views counter for tool videos
+- add notification event triggers
 - api auth (admin and client routes)
+- Admin Dashboard
 
 Bug:
 - tools/upload. after file upload, the secure url doesn't work
