@@ -1,85 +1,107 @@
 # Avantra
 
-Avantra is a membership management app
+Avantra is a powerful membership management application designed to streamline user interactions, notifications, and payments efficiently.
 
-## Tech Stack
+## 🚀 Tech Stack
 
-Node, Express, MongoDB, Cloudinary, Socket.IO, Stripe
+- **Backend:** Node.js, Express.js, MongoDB
+- **Media Management:** Cloudinary
+- **Real-Time Communication:** Socket.IO
+- **Payments:** Stripe
 
-## Documentation
+## 📖 Documentation
 
-[Postman](https://spark-tech-1674.postman.co/workspace/Spark-Tech-Workspace~3dc67139-acf2-4e3c-bea2-20bc71e1fb41/collection/41742263-78841f1a-37b3-493e-a2fc-a1c85c637a80?action=share&creator=41742263)
+Find the full API documentation here:  
+[Postman Collection](https://spark-tech-1674.postman.co/workspace/Spark-Tech-Workspace~3dc67139-acf2-4e3c-bea2-20bc71e1fb41/collection/41742263-78841f1a-37b3-493e-a2fc-a1c85c637a80?action=share&creator=41742263)
 
-## Environment Variables
+## 🔑 Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+Ensure the following environment variables are set in your `.env` file before running the project:
 
-#### Server
+### Server
+- `BASE_URL`
+- `PORT`
 
-`BASE_URL`
-`PORT`
+### Authentication
+- `ACCESS_TOKEN_SECRET`
+- `REFRESH_TOKEN_SECRET`
+- `PASSWORD_RESET_SECRET`
 
-#### Auth
+### Security & Encryption
+- `SALT_ROUNDS`
 
-`ACCESS_TOKEN_SECRET`
-`REFRESH_TOKEN_SECRET`
-`PASSWORD_RESET_SECRET`
+### Database
+- `MONGO_URI`
 
-#### Bcrypt
+### Email (Nodemailer)
+- `EMAIL_USER`
+- `EMAIL_PASS`
 
-`SALT_ROUNDS`
+### Cloud Storage (Cloudinary)
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
 
-#### Database
+### Payments (Stripe)
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 
-`MONGO_URI`
+## 🚀 Deployment
 
-#### Nodemailer
-
-`EMAIL_USER`
-`EMAIL_PASS`
-
-#### Cloudinary
-
-`CLOUDINARY_CLOUD_NAME`
-`CLOUDINARY_API_KEY`
-`CLOUDINARY_API_SECRET`
-
-#### Stripe
-
-`STRIPE_PUBLISHABLE_KEY`
-`STRIPE_SECRET_KEY`
-`STRIPE_WEBHOOK_SECRET`
-
-## Deployment
-
-To run this project
+To run the project locally:
 
 ```bash
-  npm run dev
+npm run dev
 ```
 
-To build and deploy this project
+To build and deploy:
 
 ```bash
-  npm run build && npm run start
+npm run build && npm run start
 ```
 
-## Roadmap
+## 🔔 Notifications
 
-Todos:
-- add notification event triggers
-- api auth (admin and client routes)
-- Admin Dashboard
+The application leverages **Socket.IO** to deliver real-time notifications.
 
-Clean Up:
-- Remove otp from responses. src/controllers/user.ts
+### ⚡ How It Works
 
-Improvements:
-- Instead of keep creating OTPs untill we finally save a unique OTP, we can save it like this format: "user@email.com:615243"
+- Each **user** is automatically joined to a room based on their `userId`.
+- **Admins** belong to a global `"admin"` room for system-wide updates.
 
-Do Later:
-- Test Stripe Connect Transfers
+### 🎯 Frontend Integration
 
-## Authors
+#### 📥 Listen for user notifications
+```javascript
+socket.on("new_notification", (data) => {
+    console.log("User Notification:", data);
+});
+```
 
-- [@safin-sys](https://www.github.com/safin-sys)
+#### ⚙️ Listen for admin notifications
+```javascript
+socket.on("admin_notification", (data) => {
+    console.log("Admin Notification:", data);
+});
+```
+
+## 📌 Roadmap
+
+### ✅ Upcoming Features:
+- Implement additional notification event triggers
+- Set up API authentication for admin and client routes
+- Develop an intuitive **Admin Dashboard**
+
+### 🧹 Cleanup Tasks:
+- Remove OTP from responses in `src/controllers/user.ts`
+
+### 🚀 Enhancements:
+- Optimize OTP generation by storing it as `user@email.com:615243` to avoid redundant creation attempts.
+
+### 🔬 Future Tests:
+- Validate **Stripe Connect Transfers**
+
+## 👥 Authors
+
+- **[@safin-sys](https://www.github.com/safin-sys)**
