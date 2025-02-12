@@ -249,49 +249,63 @@ const admin_overview_utils = {
     };
   },
   referral_overview: async () => {
-    const results: any[] = [];
+    const users = await DB.UserModel.find({}, {
+      createdAt: 1,
+      _id: 1,
+      name: 1,
+      photoUrl: 1,
+      referredBy: 1,
+    });
 
-    const allUsers = await DB.UserModel.find({});
+    const relations: any[] = [];
 
-    const collectReferralInfo = async (
-      userId: Types.ObjectId,
-      level = 1,
-      results: any[]
-    ) => {
-      const referrer = await DB.UserModel.findById(userId);
-      if (!referrer) return;
-      const referredUsers = await DB.UserModel.find({ referredBy: userId });
-
+    const findRelations = async () => {
       await Promise.all(
-        referredUsers.map(async (referredUser) => {
-          const referralInfo = {
-            date: referredUser.createdAt, // capture the referred user's creation date
-            referrer: {
-              name: referrer.name,
-              photoUrl: referrer.photoUrl,
-            },
-            referee: {
-              name: referredUser.name,
-              photoUrl: referredUser.photoUrl,
-            },
-            referral_level: level,
+        users.map(async (referrer) => {
+          const findDownstreamChain = async (
+            currentUserId: string,
+            level = 1
+          ) => {
+            const directReferrals = await DB.UserModel.find(
+              { referredBy: currentUserId },
+              {
+                createdAt: 1,
+                _id: 1,
+                name: 1,
+                photoUrl: 1,
+                referredBy: 1,
+              }
+            );
+
+            await Promise.all(
+              directReferrals.map(async (referee) => {
+                relations.push({
+                  createdAt: referee.createdAt,
+                  referredBy: {
+                    name: referrer.name,
+                    photoUrl: referrer.photoUrl,
+                  },
+                  referee: {
+                    name: referee.name,
+                    photoUrl: referee.photoUrl,
+                  },
+                  referral_level: level,
+                });
+
+                await findDownstreamChain(referee._id.toString(), level + 1);
+              })
+            );
           };
 
-          results.push(referralInfo);
-          await collectReferralInfo(referredUser._id, level + 1, results);
+          await findDownstreamChain(referrer._id.toString());
         })
       );
     };
 
-    await Promise.all(
-      allUsers.map(async (user) => {
-        if (user.referredUsers && user.referredUsers.length > 0) {
-          await collectReferralInfo(user._id, 1, results);
-        }
-      })
-    );
+    await findRelations();
 
-    return results;
+    relations.sort((a, b) => a.createdAt - b.createdAt);
+    return relations.slice(0, 5);
   },
   top_referrers: async () => {
     const topReferrers = await DB.UserModel.aggregate([
