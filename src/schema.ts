@@ -5,7 +5,7 @@ const ObjectId = Schema.ObjectId;
 
 const User = new Schema({
   id: ObjectId,
-  createdAt: { type: String, default: new Date() },
+  createdAt: { type: Date, default: new Date() },
   photoUrl: { type: String, default: "https://ui-avatars.com/api/" },
   name: { type: String, required: true },
   email: { type: String, required: true },
@@ -74,6 +74,7 @@ const Notification = new Schema({
   description: { type: String, required: true },
   type: { type: String, required: true },
   isRead: { type: Boolean, default: false, required: true },
+  isReadByAdmin: { type: Boolean, default: false, required: true },
 });
 
 const Referral = new Schema({

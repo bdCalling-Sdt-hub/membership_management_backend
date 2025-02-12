@@ -89,9 +89,9 @@ socket.on("admin_notification", (data) => {
 ## 📌 Roadmap
 
 ### ✅ Upcoming Features:
+- Develop an intuitive **Admin Dashboard**
 - Implement additional notification event triggers
 - Set up API authentication for admin and client routes
-- Develop an intuitive **Admin Dashboard**
 
 ### 🧹 Cleanup Tasks:
 - Remove OTP from responses in `src/controllers/user.ts`

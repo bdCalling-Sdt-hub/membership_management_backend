@@ -169,4 +169,251 @@ const referral_history = async (req: Request, res: Response): Promise<void> => {
   res.status(200).json(mappedUsers);
 };
 
-export { overview, referral_history };
+const admin_overview_utils = {
+  basic_stats: async () => {
+    const [total_users, active_users, total_referrals, total_income] =
+      await Promise.all([
+        DB.UserModel.countDocuments(),
+        DB.UserModel.countDocuments({ isSubscribed: true }),
+        DB.UserModel.aggregate([
+          { $unwind: "$referredUsers" },
+          { $count: "total" },
+        ]).then((result) => (result[0] ? result[0].total : 0)),
+        DB.PaymentModel.aggregate([
+          { $group: { _id: null, total: { $sum: "$amount" } } },
+          { $project: { _id: 0, total: 1 } },
+        ]).then((result) => (result[0] ? result[0].total : 0)),
+      ]);
+
+    return { total_users, active_users, total_referrals, total_income };
+  },
+  income_overview: async (income_year: any) => {
+    const income_overview = await DB.PaymentModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(`${income_year}-01-01`),
+            $lt: new Date(`${income_year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          total: { $sum: "$amount" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    const formattedIncomeOverview = Array(12).fill(0);
+    income_overview.forEach((data) => {
+      formattedIncomeOverview[data._id - 1] = data.total;
+    });
+    return {
+      year: income_year,
+      overview: formattedIncomeOverview,
+    };
+  },
+  user_overview: async (user_year: any) => {
+    const user_overview = await DB.UserModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(`${user_year}-01-01`),
+            $lt: new Date(`${user_year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    const formattedUserOverview = Array(12).fill(0);
+    user_overview.forEach((data) => {
+      formattedUserOverview[data._id - 1] = data.count;
+    });
+
+    return {
+      year: user_year,
+      overview: formattedUserOverview,
+    };
+  },
+  referral_overview: async () => {
+    const results: any[] = [];
+
+    const allUsers = await DB.UserModel.find({});
+
+    const collectReferralInfo = async (
+      userId: Types.ObjectId,
+      level = 1,
+      results: any[]
+    ) => {
+      const referrer = await DB.UserModel.findById(userId);
+      if (!referrer) return;
+      const referredUsers = await DB.UserModel.find({ referredBy: userId });
+
+      await Promise.all(
+        referredUsers.map(async (referredUser) => {
+          const referralInfo = {
+            date: referredUser.createdAt, // capture the referred user's creation date
+            referrer: {
+              name: referrer.name,
+              photoUrl: referrer.photoUrl,
+            },
+            referee: {
+              name: referredUser.name,
+              photoUrl: referredUser.photoUrl,
+            },
+            referral_level: level,
+          };
+
+          results.push(referralInfo);
+          await collectReferralInfo(referredUser._id, level + 1, results);
+        })
+      );
+    };
+
+    await Promise.all(
+      allUsers.map(async (user) => {
+        if (user.referredUsers && user.referredUsers.length > 0) {
+          await collectReferralInfo(user._id, 1, results);
+        }
+      })
+    );
+
+    return results;
+  },
+  top_referrers: async () => {
+    const topReferrers = await DB.UserModel.aggregate([
+      {
+        $project: {
+          name: 1,
+          photoUrl: 1,
+          totalReferrals: { $size: "$referredUsers" },
+        },
+      },
+      { $match: { totalReferrals: { $gt: 0 } } },
+      { $sort: { totalReferrals: -1 } },
+    ]);
+
+    return topReferrers.map((referrer) => ({
+      name: referrer.name,
+      photoUrl: referrer.photoUrl,
+      totalReferrals: referrer.totalReferrals,
+    }));
+  },
+};
+
+const admin_overview = async (req: Request, res: Response): Promise<void> => {
+  const income_year =
+    req?.query?.income_year || new Date().getFullYear().toString();
+  const user_year =
+    req?.query?.user_year || new Date().getFullYear().toString();
+
+  res.status(200).json({
+    unread_notification_count: 0,
+    basic_stats: await admin_overview_utils.basic_stats(),
+    income_overview: await admin_overview_utils.income_overview(income_year),
+    user_overview: await admin_overview_utils.user_overview(user_year),
+    referral_overview: await admin_overview_utils.referral_overview(),
+    top_referrers: await admin_overview_utils.top_referrers(),
+  });
+};
+
+const referral_overview = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { page, limit, query } = req.query;
+
+  const searchParams: any = {};
+
+  if (query) {
+    searchParams.$or = [{ name: { $regex: query, $options: "i" } }];
+  }
+
+  const users = await DB.UserModel.find(searchParams, {
+    createdAt: 1,
+    _id: 1,
+    name: 1,
+    photoUrl: 1,
+    referredBy: 1,
+  });
+
+  const relations: any[] = [];
+
+  const findRelations = async () => {
+    await Promise.all(
+      users.map(async (referrer) => {
+        const findDownstreamChain = async (
+          currentUserId: string,
+          level = 1
+        ) => {
+          const directReferrals = await DB.UserModel.find(
+            {
+              referredBy: currentUserId,
+            },
+            {
+              createdAt: 1,
+              _id: 1,
+              name: 1,
+              photoUrl: 1,
+              referredBy: 1,
+            }
+          );
+
+          await Promise.all(
+            directReferrals.map(async (referee) => {
+              relations.push({
+                createdAt: referee.createdAt,
+                referredBy: {
+                  name: referrer.name,
+                  photoUrl: referrer.photoUrl,
+                },
+                referee: {
+                  name: referee.name,
+                  photoUrl: referee.photoUrl,
+                },
+                referral_level: level,
+              });
+
+              await findDownstreamChain(referee._id.toString(), level + 1);
+            })
+          );
+        };
+
+        await findDownstreamChain(referrer._id.toString());
+      })
+    );
+  };
+
+  await findRelations();
+
+  relations.sort((a, b) => a.createdAt - b.createdAt);
+
+  const startIndex = (+(page || 1) - 1) * +(limit || 10);
+  const endIndex = startIndex + +(limit || 10);
+
+  const paginatedRelations = relations.slice(startIndex, endIndex);
+
+  const pagination = {
+    page: parseInt(page as string),
+    limit: parseInt(limit as string),
+    total: relations.length,
+    totalPages: Math.ceil(relations.length / parseInt(limit as string)),
+  };
+
+  res.status(200).json({ referrals: paginatedRelations, pagination });
+};
+
+export { overview, referral_history, admin_overview, referral_overview };
