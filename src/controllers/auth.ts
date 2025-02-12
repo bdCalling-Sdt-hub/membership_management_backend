@@ -320,8 +320,8 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   const email = emailFromBody.trim().toLowerCase();
 
   // check if email password matches with DB
-  const user = await DB.UserModel.find({ email }).exec();
-  if (user?.length === 0) {
+  const user = await DB.UserModel.findOne({ email }).exec();
+  if (!user) {
     res.status(StatusCodes.NOT_FOUND).json({
       message: "User not found",
     });
@@ -329,7 +329,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   }
 
   // check if user account is verified
-  if (!user[0].emailVerified) {
+  if (!user.emailVerified) {
     res.status(403).json({
       message: "Account is not verified. Please verify your email first.",
     });
@@ -337,10 +337,10 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   }
 
   // check if user account is subscribed
-  checkSubscriptionStatus(user[0]?._id.toString());
+  checkSubscriptionStatus(user._id.toString());
 
   // Compare passwords
-  const isMatch = await compare(password, user[0].passwordHash);
+  const isMatch = await compare(password, user.passwordHash);
   if (!isMatch) {
     res.status(StatusCodes.CONFLICT).json({
       message: "Password is incorrect",
@@ -351,13 +351,13 @@ const signin = async (req: Request, res: Response): Promise<void> => {
 
   // Generate tokens
   const accessToken = sign(
-    { email, userId: user[0]._id },
+    { email, userId: user._id, role: user.role },
     process.env.ACCESS_TOKEN_SECRET || "fallback_secret",
     { expiresIn: "2m" }
   );
 
   const refreshToken = sign(
-    { email, userId: user[0]._id },
+    { email, userId: user._id, role: user.role },
     process.env.REFRESH_TOKEN_SECRET || "fallback_secret",
     { expiresIn: remember_me ? "30d" : "10m" }
   );
@@ -395,6 +395,7 @@ const refresh_token = async (req: Request, res: Response): Promise<void> => {
           {
             email: (decoded as JwtPayload).email,
             userId: (decoded as JwtPayload).userId,
+            role: (decoded as JwtPayload).role,
           },
           process.env.ACCESS_TOKEN_SECRET || "fallback_secret",
           { expiresIn: "2m" }

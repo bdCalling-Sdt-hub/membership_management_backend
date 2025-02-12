@@ -1,6 +1,14 @@
-import { Request, Response } from "express";
+import { Request as ExpressRequest, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import DB from "src/db";
+
+interface Request extends ExpressRequest {
+  user?: {
+    id: string;
+    email: string;
+    role?: string;
+  };
+}
 
 const notifications = async (req: Request, res: Response): Promise<void> => {
   const { page, limit } = req.query;
@@ -32,7 +40,7 @@ const notifications_by_id = async (
 ): Promise<void> => {
   try {
     const { page, limit } = req.query || {};
-    const { userId } = req.params || {};
+    const userId = req.user?.id || {};
 
     if (!isValidObjectId(userId)) {
       res.status(400).json({ message: "Invalid id" });
@@ -69,7 +77,7 @@ const notifications_count = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { userId } = req?.params || {};
+    const userId = req.user?.id || {};
 
     const count = await DB.NotificationModel.countDocuments({
       isRead: false,
@@ -101,7 +109,7 @@ const mark_as_read = async (req: Request, res: Response): Promise<void> => {
 
 const mark_all_as_read = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req?.params || {};
+    const userId = req.user?.id || {};
 
     await DB.NotificationModel.updateMany(
       { recipientId: userId },

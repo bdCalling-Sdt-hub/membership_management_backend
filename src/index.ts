@@ -5,7 +5,11 @@ import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
 import http from "http";
 import "@services/notificationService";
-import { registerRoutes, registerRoutesThatNeedsRawBody } from "@routes/index";
+import {
+  registerAdminRoutes,
+  registerRoutesThatNeedsRawBody,
+  registerUserRoutes,
+} from "@routes/index";
 
 // config
 const app = express();
@@ -28,7 +32,8 @@ app.use(cors({ origin: "*" }));
 
 registerRoutesThatNeedsRawBody(app); // have to call this before express.json() to get raw body
 app.use(express.json());
-registerRoutes(app);
+registerUserRoutes(app);
+registerAdminRoutes(app);
 // config
 
 const PORT = process.env.PORT || 3000;
