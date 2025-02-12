@@ -7,7 +7,7 @@ import { generate } from "otp-generator";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { OTPTypes } from "@services/otpService";
 import { config } from "dotenv";
-import eventBus from "@utils/eventBus";
+import { triggerNotification } from "@utils/eventBus";
 import { v4 } from "uuid";
 import checkSubscriptionStatus from "@utils/checkSubscriptionStatus";
 
@@ -104,7 +104,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
     await DB.OTPModel.create({ email, otp, type: OTPTypes.SIGNUP });
 
-    eventBus.emit("user_signup", { userId: newUser._id });
+    triggerNotification("USER_SIGNUP", { userId: newUser?._id.toString() });
 
     res.status(200).json({
       success: true,
@@ -199,7 +199,7 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
     await DB.UserModel.updateOne({ email }, { $set: { emailVerified: true } });
 
     const user = await DB.UserModel.findOne({ email });
-    eventBus.emit("email_verified", { userId: user?._id.toString() });
+    triggerNotification("EMAIL_VERIFIED", { userId: user?._id.toString() });
 
     if (response[0].type === OTPTypes.FORGOT_PASSWORD) {
       const passwordResetToken = sign(
@@ -304,7 +304,10 @@ const update_password = async (req: Request, res: Response): Promise<void> => {
 
   await DB.UserModel.updateOne({ email }, { $set: { passwordHash } });
 
-  eventBus.emit("password_update", { userId: existingUser?._id.toString() });
+  triggerNotification("PASSWORD_UPDATE", {
+    userId: existingUser?._id.toString(),
+  });
+
   res.status(StatusCodes.OK).json({
     message: "Password updated successfully",
   });

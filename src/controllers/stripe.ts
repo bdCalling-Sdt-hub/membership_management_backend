@@ -4,6 +4,7 @@ import {
   transferToConnectedAccount,
 } from "@services/stripeService";
 import distributeReferralEarnings from "@utils/distributeReferralEarnings";
+import { triggerNotification } from "@utils/eventBus";
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import DB from "src/db";
@@ -73,10 +74,13 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
         userId: session.client_reference_id,
       });
 
-      await DB.UserModel.findByIdAndUpdate(session.client_reference_id, {
-        isSubscribed: true,
-        subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
-      });
+      const user = await DB.UserModel.findByIdAndUpdate(
+        session.client_reference_id,
+        {
+          isSubscribed: true,
+          subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30-day subscription period
+        }
+      );
 
       // distribute referral commissions to refferers
       distributeReferralEarnings(
@@ -84,14 +88,25 @@ const stripe_webhook = async (req: Request, res: Response): Promise<void> => {
         (session.amount_total ?? 0) / 100
       );
 
+      triggerNotification("PAYMENT_SUCCESS", {
+        userId: user?._id.toString(),
+        userEmail: user?.email,
+      });
+
       res.send();
     } else if (event.type === "account.external_account.created") {
-      await DB.UserModel.findOneAndUpdate(
+      const user = await DB.UserModel.findOneAndUpdate(
         { stripeAccountId: event.account },
         {
           stripeOnboardingDone: true,
         }
       );
+
+      triggerNotification("ACCOUNT_ONBOARDED", {
+        userId: user?._id.toString(),
+        userEmail: user?.email,
+      });
+
       res.send();
     } else {
       console.log(`Unhandled event type ${event.type}`);

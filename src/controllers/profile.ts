@@ -6,7 +6,7 @@ import { config } from "dotenv";
 import DB from "src/db";
 import uploadService from "@services/uploadService";
 import { compare, hash } from "bcrypt";
-import eventBus from "@utils/eventBus";
+import { triggerNotification } from "@utils/eventBus";
 
 config();
 
@@ -116,7 +116,7 @@ const delete_account = async (req: Request, res: Response): Promise<void> => {
 
     // update user accountStatus to deleted
     await DB.UserModel.findByIdAndUpdate(id, { accountStatus: "deleted" });
-    eventBus.emit("account_deleted", { userEmail: user?.email });
+    triggerNotification("ACCOUNT_DELETED", { userEmail: user?.email });
 
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {

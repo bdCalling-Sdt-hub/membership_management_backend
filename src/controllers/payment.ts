@@ -1,4 +1,5 @@
 import { transferToConnectedAccount } from "@services/stripeService";
+import { triggerNotification } from "@utils/eventBus";
 import { Request as ExpressRequest, Response } from "express";
 interface Request extends ExpressRequest {
   user?: any;
@@ -66,6 +67,11 @@ const request_withdrawal = async (
       amount,
       transactionId,
       stripeAccountId: user.stripeAccountId,
+    });
+
+    triggerNotification("WITHDRAWAL_REQUESTED", {
+      userId: user?._id.toString(),
+      userEmail: user?.email,
     });
 
     res
@@ -195,13 +201,26 @@ const update_withdraw_requests = async (
         return;
       }
 
-      await DB.UserModel.findByIdAndUpdate(withdraw.requesterId, {
+      const user = await DB.UserModel.findByIdAndUpdate(withdraw.requesterId, {
         $inc: { balance: -withdraw.amount },
       });
       await DB.WithdrawalModel.findByIdAndUpdate(withdraw_id, {
         status,
         stripeResponse: stripeTransfer,
       });
+
+      triggerNotification("WITHDRAWAL_APPROVED", {
+        userId: user?._id.toString(),
+        userEmail: user?.email,
+      });
+
+      if (stripeTransfer.error) {
+        triggerNotification("WITHDRAWAL_FAILED", {
+          userId: user?._id.toString(),
+          userEmail: user?.email,
+        });
+      }
+
       res
         .status(200)
         .json({ message: "Withdrawal request approved successfully" });
@@ -210,6 +229,14 @@ const update_withdraw_requests = async (
       res.status(500).json({ message: "Internal Server Error" });
       return;
     }
+  }
+
+  if (status === "rejected") {
+    const user = await DB.UserModel.findById(withdraw.requesterId);
+    triggerNotification("WITHDRAWAL_REJECTED", {
+      userId: user?._id.toString(),
+      userEmail: user?.email,
+    });
   }
 
   try {

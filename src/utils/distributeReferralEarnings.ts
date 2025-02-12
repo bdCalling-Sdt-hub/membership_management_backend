@@ -1,5 +1,6 @@
 import { createStripeConnectExpressAccount } from "@services/stripeService";
 import DB from "src/db";
+import { triggerNotification } from "@utils/eventBus";
 
 export default async function distributeReferralEarnings(
   userId: string,
@@ -44,8 +45,13 @@ export default async function distributeReferralEarnings(
       }
 
       // Update referrer's earnings
-      await DB.UserModel.findByIdAndUpdate(referrer._id, {
+      const referrerUser = await DB.UserModel.findByIdAndUpdate(referrer._id, {
         $inc: { referralEarnings: commission, balance: commission },
+      });
+
+      triggerNotification("REFERRAL_COMMISSION", {
+        userId: referrerUser?._id.toString(),
+        amount: commission,
       });
     }
 

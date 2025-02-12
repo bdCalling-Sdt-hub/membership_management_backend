@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import DB from "src/db";
+import { triggerNotification } from "@utils/eventBus";
 
 const privacy_policy = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -74,7 +74,7 @@ const Notification = new Schema({
   description: { type: String, required: true },
   type: { type: String, required: true },
   isRead: { type: Boolean, default: false, required: true },
-  isReadByAdmin: { type: Boolean, default: false, required: true },
+  recipientRole: { type: String, required: true },
 });
 
 const Referral = new Schema({
