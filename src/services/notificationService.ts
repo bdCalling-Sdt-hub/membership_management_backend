@@ -2,8 +2,15 @@ import eventBus from "@utils/eventBus";
 import { io } from "src";
 import DB from "src/db";
 
+export const EVENTS = {
+  USER_SIGNUP: "user_signup",
+  EMAIL_VERIFIED: "email_verified",
+  PASSWORD_UPDATE: "password_update",
+  ACCOUNT_DELETED: "account_deleted",
+};
+
 // user_signup // admin & user
-eventBus.on("user_signup", async (data) => {
+eventBus.on(EVENTS.USER_SIGNUP, async (data) => {
   try {
     const notification = new DB.NotificationModel({
       recipientId: data.userId,
@@ -11,8 +18,7 @@ eventBus.on("user_signup", async (data) => {
       description: "Your account has been successfully created.",
       type: "info",
     });
-    console.log("user signup", data);
-    
+
     await notification.save();
     io.to(data.userId).emit("new_notification", notification);
     io.to("admin").emit("admin_notification", notification);
@@ -22,7 +28,7 @@ eventBus.on("user_signup", async (data) => {
 });
 
 // email_verified // admin & user
-eventBus.on("email_verified", async (data) => {
+eventBus.on(EVENTS.EMAIL_VERIFIED, async (data) => {
   try {
     const notification = new DB.NotificationModel({
       recipientId: data.userId,
@@ -40,7 +46,7 @@ eventBus.on("email_verified", async (data) => {
 });
 
 // password_update // user
-eventBus.on("password_update", async (data) => {
+eventBus.on(EVENTS.PASSWORD_UPDATE, async (data) => {
   try {
     const notification = new DB.NotificationModel({
       recipientId: data.userId,
@@ -58,7 +64,7 @@ eventBus.on("password_update", async (data) => {
 });
 
 // account_deleted // admin
-eventBus.on("account_deleted", async (data) => {
+eventBus.on(EVENTS.ACCOUNT_DELETED, async (data) => {
   try {
     const notification = new DB.NotificationModel({
       title: "User Account Deleted",

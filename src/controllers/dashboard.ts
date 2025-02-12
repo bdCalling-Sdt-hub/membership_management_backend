@@ -249,13 +249,16 @@ const admin_overview_utils = {
     };
   },
   referral_overview: async () => {
-    const users = await DB.UserModel.find({}, {
-      createdAt: 1,
-      _id: 1,
-      name: 1,
-      photoUrl: 1,
-      referredBy: 1,
-    });
+    const users = await DB.UserModel.find(
+      {},
+      {
+        createdAt: 1,
+        _id: 1,
+        name: 1,
+        photoUrl: 1,
+        referredBy: 1,
+      }
+    );
 
     const relations: any[] = [];
 
@@ -320,11 +323,13 @@ const admin_overview_utils = {
       { $sort: { totalReferrals: -1 } },
     ]);
 
-    return topReferrers.map((referrer) => ({
-      name: referrer.name,
-      photoUrl: referrer.photoUrl,
-      totalReferrals: referrer.totalReferrals,
-    }));
+    return topReferrers
+      .map((referrer) => ({
+        name: referrer.name,
+        photoUrl: referrer.photoUrl,
+        totalReferrals: referrer.totalReferrals,
+      }))
+      .slice(0, 5);
   },
 };
 
