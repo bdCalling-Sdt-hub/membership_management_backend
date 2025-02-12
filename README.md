@@ -88,9 +88,6 @@ socket.on("admin_notification", (data) => {
 
 ## 📌 Roadmap
 
-### ✅ Upcoming Features:
-- Set up API authentication for admin and client routes
-
 ### 🧹 Cleanup Tasks:
 - Remove OTP from responses in `src/controllers/user.ts`
 
