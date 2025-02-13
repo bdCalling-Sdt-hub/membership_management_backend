@@ -88,9 +88,6 @@ socket.on("admin_notification", (data) => {
 
 ## 📌 Roadmap
 
-### 🧹 Cleanup Tasks:
-- Remove OTP from responses in `src/controllers/user.ts`
-
 ### 🚀 Enhancements:
 - Optimize OTP generation by storing it as `user@email.com:615243` to avoid redundant creation attempts.
 

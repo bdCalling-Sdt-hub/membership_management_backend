@@ -13,6 +13,8 @@ import checkSubscriptionStatus from "@utils/checkSubscriptionStatus";
 
 config();
 
+const ENV = process.env.NODE_ENV;
+
 const signup = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -106,11 +108,16 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
     triggerNotification("USER_SIGNUP", { userId: newUser?._id.toString() });
 
-    res.status(200).json({
+    const response: { success: boolean; message: string; otp?: string } = {
       success: true,
       message: "OTP sent successfully",
-      otp,
-    });
+    };
+
+    if (ENV === "development") {
+      response.otp = otp;
+    }
+
+    res.status(200).json(response);
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message || "Internal Server Error",
@@ -154,11 +161,16 @@ const resend = async (req: Request, res: Response): Promise<void> => {
 
     await DB.OTPModel.create({ email, otp, type });
 
-    res.status(200).json({
+    const response: { success: boolean; message: string; otp?: string } = {
       success: true,
       message: "OTP sent successfully",
-      otp,
-    });
+    };
+
+    if (ENV === "development") {
+      response.otp = otp;
+    }
+
+    res.status(200).json(response);
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message || "Internal Server Error",
@@ -253,11 +265,16 @@ const forgot_password = async (req: Request, res: Response): Promise<void> => {
 
   await DB.OTPModel.create({ email, otp, type: OTPTypes.FORGOT_PASSWORD });
 
-  res.status(200).json({
+  const response: { success: boolean; message: string; otp?: string } = {
     success: true,
     message: "OTP for resetting the password sent successfully",
-    otp,
-  });
+  };
+
+  if (ENV === "development") {
+    response.otp = otp;
+  }
+
+  res.status(200).json(response);
 };
 
 const update_password = async (req: Request, res: Response): Promise<void> => {
