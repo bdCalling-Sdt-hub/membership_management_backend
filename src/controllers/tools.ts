@@ -1,4 +1,5 @@
 import uploadService from "@services/uploadService";
+import getYouTubeVideoID from "@utils/getYoutubeVideoID";
 import handleFileResponse from "@utils/handleFIleResponse";
 import { config } from "dotenv";
 import { Request, Response } from "express";
@@ -365,7 +366,7 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
 };
 
 const upload = async (req: Request, res: Response): Promise<void> => {
-  const { toolId, title } = req?.query || {};
+  const { toolId, title, youtube_url } = req?.query || {};
 
   if (!toolId || !title) {
     res.status(400).json({ message: "Tool id and title are required" });
@@ -374,6 +375,35 @@ const upload = async (req: Request, res: Response): Promise<void> => {
 
   if (!isValidObjectId(toolId)) {
     res.status(400).json({ message: "Invalid id" });
+    return;
+  }
+
+  const tool = await DB.ToolModel.findById(toolId);
+
+  if (!tool) {
+    res.status(404).json({ message: "Tool category not found" });
+    return;
+  }
+
+  if (tool.name === "Youtube" && !youtube_url) {
+    res.status(400).json({ message: "Youtube url is required" });
+    return;
+  }
+
+  if (youtube_url && tool.name === "Youtube") {
+    const videoId = getYouTubeVideoID(youtube_url.toString());
+    if (!videoId) {
+      res.status(400).json({ message: "Invalid youtube url" });
+      return;
+    }
+
+    await DB.VideoModel.create({
+      toolId,
+      title,
+      url: `${videoId}`,
+    });
+
+    res.json({ message: "Video uploaded successfully" });
     return;
   }
 
@@ -396,14 +426,7 @@ const upload = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const tool = await DB.ToolModel.findById(toolId);
-
-  if (!tool) {
-    res.status(404).json({ message: "Tool category not found" });
-    return;
-  }
-
-  if (video) {
+  if (video && tool.name !== "Youtube") {
     const videoUrl = await uploadService(video[0], "video");
 
     if (!videoUrl) {
@@ -418,7 +441,7 @@ const upload = async (req: Request, res: Response): Promise<void> => {
     });
   }
 
-  if (file) {
+  if (file && tool.name !== "Youtube") {
     const fileUrl = await uploadService(file[0], "raw");
 
     if (!fileUrl) {

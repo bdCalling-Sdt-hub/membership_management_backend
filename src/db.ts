@@ -2,11 +2,31 @@ import mongoose from "mongoose";
 import Schema from "./schema";
 import { attachOTPHooks } from "@services/otpService";
 
-mongoose
-  .connect(process.env.MONGO_URI || "")
-  .then(() => console.log("MongoDB Connected!"));
+const startDB = async () => {
+  await mongoose.connect(process.env.MONGO_URI || "");
+  console.log("MongoDB Connected!");
 
-attachOTPHooks();
+  initializeDB();
+};
+
+const initializeDB = async () => {
+  attachOTPHooks();
+  try {
+    const existingDoc = await ToolModel.findOne({ name: "Youtube" });
+
+    if (!existingDoc) {
+      await ToolModel.create({
+        name: "Youtube",
+        icon: "https://static.cdnlogo.com/logos/y/57/youtube-icon.svg",
+      });
+      console.log("Youtube tool created.");
+    }
+  } catch (error) {
+    console.error("Error ensuring document exists:", error);
+  }
+};
+
+startDB();
 
 const UserModel = mongoose.model("User", Schema.User);
 const OTPModel = mongoose.model("OTP", Schema.OTP);
