@@ -10,6 +10,7 @@ import {
   registerRoutesThatNeedsRawBody,
   registerUserRoutes,
 } from "@routes/index";
+import db from "./db";
 
 // config
 const app = express();
@@ -44,6 +45,21 @@ server.setTimeout(60000); // 1 Minute
 // socket.io for notifications
 io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
+
+  socket.on("get_notifications", async (userId) => {
+    const notifications = await db.NotificationModel.find(
+      { recipientId: userId },
+      { __v: 0 }
+    );
+    socket.emit("previous_notifications", notifications);
+  });
+
+  socket.on("mark_notification_read", async (userId) => {
+    await db.NotificationModel.updateMany(
+      { recipientId: userId, isRead: false },
+      { isRead: true }
+    );
+  });
 
   socket.on("join", (room) => {
     socket.join(room);
