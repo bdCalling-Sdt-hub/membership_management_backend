@@ -71,6 +71,7 @@ const File = new Schema({
 const Tool = new Schema({
   name: { type: String, required: true },
   icon: { type: String, required: true },
+  order: { type: Number, unique: true },
 });
 
 const Notification = new Schema({

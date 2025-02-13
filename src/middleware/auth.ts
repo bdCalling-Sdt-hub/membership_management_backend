@@ -19,15 +19,15 @@ export function authorize(allowedRoles?: string[]) {
     const jwt = req.headers.authorization?.split(" ")[1];
 
     if (!jwt) {
-      if (ENV === "development") {
-        req.user = {
-          id: "666666666666666666666666",
-          email: "test@test.com",
-          role: "admin",
-        };
-        next();
-        return;
-      }
+      // if (ENV === "development") {
+      //   req.user = {
+      //     id: "666666666666666666666666",
+      //     email: "test@test.com",
+      //     role: "admin",
+      //   };
+      //   next();
+      //   return;
+      // }
       res.status(401).json({ message: "Unauthorized" });
       return;
     }

@@ -27,6 +27,7 @@ const tools = async (req: Request, res: Response): Promise<void> => {
       name: 1,
       icon: 1,
     })
+      .sort({ order: -1, name: 1 })
       .skip((+(page || 1) - 1) * +(limit || 10))
       .limit(+(limit || 10));
 

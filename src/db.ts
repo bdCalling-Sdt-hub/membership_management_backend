@@ -18,6 +18,7 @@ const initializeDB = async () => {
       await ToolModel.create({
         name: "Youtube",
         icon: "https://static.cdnlogo.com/logos/y/57/youtube-icon.svg",
+        order: 0,
       });
       console.log("Youtube tool created.");
     }
