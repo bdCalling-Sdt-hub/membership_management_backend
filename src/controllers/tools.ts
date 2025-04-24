@@ -147,7 +147,31 @@ const access_file = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 // Category Management
+const get_categories = async (req: Request, res: Response): Promise<void> => {
+  const { page, limit, query } = req.query;
+  const searchQuery = query
+    ? {
+        $or: [{ name: { $regex: query, $options: "i" } }],
+      }
+    : {};
+  const categories = await DB.ToolModel.find(searchQuery)
+    .sort({ order: -1, name: 1 })
+    .skip((+(page || 1) - 1) * +(limit || 10))
+    .limit(+(limit || 10));
+
+  const total = await DB.ToolModel.countDocuments(searchQuery);
+  const pagination = {
+    page: +(page || 1),
+    limit: +(limit || 10),
+    total,
+    totalPages: Math.ceil(total / +(limit || 10)),
+  };
+  res.json({ categories, pagination });
+  return;
+};
+
 const add_category = async (req: Request, res: Response): Promise<void> => {
   const { name } = req.body;
   const icon = req.file;
@@ -289,6 +313,7 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       return {
         _id: video._id.toString(),
         category: tool?.name,
+        categoryId: tool?._id.toString(),
         title: video.title,
         url: video.url,
       };
@@ -348,6 +373,7 @@ const all_tools = async (req: Request, res: Response): Promise<void> => {
       return {
         _id: file._id.toString(),
         category: tool?.name,
+        categoryId: tool?._id.toString(),
         title: file.title,
         url: file.url,
       };
@@ -583,6 +609,7 @@ export {
   tools,
   access_file,
   upload,
+  get_categories,
   add_category,
   update_category,
   delete_category,

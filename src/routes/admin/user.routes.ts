@@ -4,6 +4,6 @@ import { Router } from "express";
 const router = Router();
 
 router.get("/", users);
-router.get("/toggle-ban", toggle_ban);
+router.post("/toggle-ban", toggle_ban);
 
 export default router;

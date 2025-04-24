@@ -5,6 +5,7 @@ import {
   all_tools,
   delete_category,
   delete_tool,
+  get_categories,
   update_category,
   update_tool,
   upload,
@@ -25,6 +26,7 @@ router.put("/update_tool", uploadFields, update_tool);
 router.delete("/delete_tool", delete_tool);
 
 // Tool Categories
+router.get("/", get_categories);
 router.post("/add_category", multerUpload.single("icon"), add_category);
 router.put("/update_category", multerUpload.single("icon"), update_category);
 router.delete("/delete_category", delete_category);

@@ -11,14 +11,20 @@ import {
   registerUserRoutes,
 } from "@routes/index";
 import db from "./db";
+import logger from "@utils/logger";
 
 // config
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+    origin: [
+      "http://localhost:5173",
+      "http://10.0.60.168:3002",
+      "http://10.0.60.168:3001",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
   },
 });
 
@@ -29,10 +35,20 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://10.0.60.168:3002",
+      "http://10.0.60.168:3001",
+    ],
+    credentials: true,
+  })
+);
 
 registerRoutesThatNeedsRawBody(app); // have to call this before express.json() to get raw body
 app.use(express.json());
+app.use(logger);
 registerUserRoutes(app);
 registerAdminRoutes(app);
 // config

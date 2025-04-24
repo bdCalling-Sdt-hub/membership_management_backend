@@ -55,14 +55,14 @@ const OTP = new Schema({
 });
 
 const Video = new Schema({
-  toolId: { type: ObjectId, required: true },
+  toolId: { type: ObjectId, ref: "Tool", required: true },
   title: { type: String, required: true },
   url: { type: String, required: true },
   views: { type: Number, default: 0, required: true },
 });
 
 const File = new Schema({
-  toolId: { type: ObjectId, required: true },
+  toolId: { type: ObjectId, ref: "Tool", required: true },
   title: { type: String, required: true },
   url: { type: String, required: true },
   downloads: { type: Number, default: 0, required: true },
@@ -71,7 +71,7 @@ const File = new Schema({
 const Tool = new Schema({
   name: { type: String, required: true },
   icon: { type: String, required: true },
-  order: { type: Number, unique: true },
+  order: { type: Number },
 });
 
 const Notification = new Schema({

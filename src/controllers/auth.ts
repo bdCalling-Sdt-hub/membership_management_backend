@@ -186,6 +186,7 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
       res.status(StatusCodes.BAD_REQUEST).json({
         message: "Email and OTP are required",
       });
+      return;
     }
 
     // normalize email
@@ -222,6 +223,7 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
 
       res.status(200).json({
         message: "OTP verified successfully",
+        success: true,
         passwordResetToken,
       });
       return;
@@ -229,6 +231,7 @@ const validate_otp = async (req: Request, res: Response): Promise<void> => {
 
     res.status(StatusCodes.OK).json({
       message: `Email ${email} verified successfully`,
+      success: true,
     });
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -370,7 +373,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   const accessToken = sign(
     { email, userId: user._id, role: user.role },
     process.env.ACCESS_TOKEN_SECRET || "fallback_secret",
-    { expiresIn: "2m" }
+    { expiresIn: "1d" }
   );
 
   const refreshToken = sign(
