@@ -20,6 +20,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "http://10.0.60.168:3002",
       "http://10.0.60.168:3001",
     ],
@@ -34,11 +35,12 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-app.use(limiter);
+// app.use(limiter);
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "http://10.0.60.168:3002",
       "http://10.0.60.168:3001",
     ],

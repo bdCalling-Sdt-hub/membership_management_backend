@@ -6,7 +6,7 @@ import { authorize } from "@middleware/auth";
 
 const registerUserRoutes = (app: Express) => {
   app.use("/auth", userRoutes.authRoutes);
-  app.use("/tools", authorize(["user"]), userRoutes.toolsRoutes);
+  app.use("/tools", userRoutes.toolsRoutes);
   app.use("/profile", authorize(["user", "admin"]), userRoutes.profileRoutes);
   app.use(
     "/notifications",

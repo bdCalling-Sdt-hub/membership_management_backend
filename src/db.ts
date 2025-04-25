@@ -25,6 +25,33 @@ const initializeDB = async () => {
   } catch (error) {
     console.error("Error ensuring document exists:", error);
   }
+
+  try {
+    const existingDocs = await ReferralModel.find();
+
+    if (!existingDocs.length) {
+      await ReferralModel.create([
+        {
+          levelName: "Level 1",
+          referralLevel: 1,
+          commission: 50,
+        },
+        {
+          levelName: "Level 2",
+          referralLevel: 2,
+          commission: 10,
+        },
+        {
+          levelName: "Level 3",
+          referralLevel: 3,
+          commission: 5,
+        },
+      ]);
+      console.log("Referral levels created.");
+    }
+  } catch (error) {
+    console.error("Error ensuring document exists:", error);
+  }
 };
 
 startDB();

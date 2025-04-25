@@ -3,6 +3,7 @@ import getYouTubeVideoID from "@utils/getYoutubeVideoID";
 import handleFileResponse from "@utils/handleFIleResponse";
 import { config } from "dotenv";
 import { Request, Response } from "express";
+import { verify } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
 import DB from "src/db";
 
@@ -114,6 +115,25 @@ const tools = async (req: Request, res: Response): Promise<void> => {
 const access_file = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      res.status(500).json({ message: "Auth token is required" });
+      return;
+    }
+
+    const secret = process.env.ACCESS_TOKEN_SECRET;
+    if (!secret) {
+      res.status(500).json({ message: "Internal Server Error" });
+      return;
+    }
+
+    verify(token, secret, (err, decoded) => {
+      if (err || !decoded) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+    });
 
     if (!isValidObjectId(id)) {
       res.status(400).json({ message: "Invalid ID" });

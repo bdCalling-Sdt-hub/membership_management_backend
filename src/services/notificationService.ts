@@ -26,6 +26,8 @@ export const EVENTS = {
 
 // user_signup // admin & user
 eventBus.on(EVENTS.USER_SIGNUP, async (data) => {
+  console.log("User signup event triggered:", data);
+
   await Promise.all([
     sendNotification({
       recipientId: data.userId,

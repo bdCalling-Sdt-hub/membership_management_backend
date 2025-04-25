@@ -70,7 +70,7 @@ const request_withdrawal = async (
     });
 
     triggerNotification("WITHDRAWAL_REQUESTED", {
-      userId: user?._id.toString(),
+      userId: req.user.id,
       userEmail: user?.email,
     });
 
