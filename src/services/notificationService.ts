@@ -2,26 +2,26 @@ import { eventBus, sendNotification } from "@utils/eventBus";
 
 export const EVENTS = {
   // Auth
-  USER_SIGNUP: "user_signup", // admin & user
-  EMAIL_VERIFIED: "email_verified", // admin & user
-  PASSWORD_UPDATE: "password_update", // user
+  USER_SIGNUP: "USER_SIGNUP", // admin & user
+  EMAIL_VERIFIED: "EMAIL_VERIFIED", // admin & user
+  PASSWORD_UPDATE: "PASSWORD_UPDATE", // user
 
   // User
-  ACCOUNT_DELETED: "account_deleted", // admin
+  ACCOUNT_DELETED: "ACCOUNT_DELETED", // admin
 
   // Stripe
-  PAYMENT_SUCCESS: "payment_success", // admin & user
-  ACCOUNT_ONBOARDED: "account_onboarded", // admin & user
+  PAYMENT_SUCCESS: "PAYMENT_SUCCESS", // admin & user
+  ACCOUNT_ONBOARDED: "ACCOUNT_ONBOARDED", // admin & user
 
   // Referral
-  REFERRAL_COMMISSION: "referral_commission", // user
+  REFERRAL_COMMISSION: "REFERRAL_COMMISSION", // user
 
   // Payments
-  WITHDRAWAL_REQUESTED: "withdrawal_requested", // admin & user
-  WITHDRAWAL_APPROVED: "withdrawal_approved", // admin & user
-  WITHDRAWAL_REJECTED: "withdrawal_rejected", // admin & user
-  WITHDRAWAL_SUCCESS: "withdrawal_success", // admin & user
-  WITHDRAWAL_FAILED: "withdrawal_failed", // admin & user
+  WITHDRAWAL_REQUESTED: "WITHDRAWAL_REQUESTED", // admin & user
+  WITHDRAWAL_APPROVED: "WITHDRAWAL_APPROVED", // admin & user
+  WITHDRAWAL_REJECTED: "WITHDRAWAL_REJECTED", // admin & user
+  WITHDRAWAL_SUCCESS: "WITHDRAWAL_SUCCESS", // admin & user
+  WITHDRAWAL_FAILED: "WITHDRAWAL_FAILED", // admin & user
 };
 
 // user_signup // admin & user
@@ -37,7 +37,7 @@ eventBus.on(EVENTS.USER_SIGNUP, async (data) => {
       type: "info",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       recipientRole: "admin",
       title: "New User Signup",
       description: "A new user has signed up.",
@@ -57,7 +57,7 @@ eventBus.on(EVENTS.EMAIL_VERIFIED, async (data) => {
       type: "success",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       recipientRole: "admin",
       title: "Email Verified!",
       description: "A user has verified their email.",
@@ -84,7 +84,7 @@ eventBus.on(EVENTS.PASSWORD_UPDATE, async (data) => {
 eventBus.on(EVENTS.ACCOUNT_DELETED, async (data) => {
   await Promise.all([
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "User Account Deleted",
       description: `The account associated with ${data.userEmail} has been deleted. Review the details if necessary.`,
       type: "warning",
@@ -104,7 +104,7 @@ eventBus.on(EVENTS.PAYMENT_SUCCESS, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Payment Successful",
       description: `The payment associated with ${data.userEmail} has been successful. Review the details if necessary.`,
       type: "success",
@@ -124,7 +124,7 @@ eventBus.on(EVENTS.ACCOUNT_ONBOARDED, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Stripe Account Onboarded",
       description: `The Stripe account associated with ${data.userEmail} has been onboarded. Review the details if necessary.`,
       type: "success",
@@ -157,7 +157,7 @@ eventBus.on(EVENTS.WITHDRAWAL_REQUESTED, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Withdrawal Requested",
       description: `The withdrawal associated with ${data.userEmail} has been requested. Review the details if necessary.`,
       type: "info",
@@ -177,7 +177,7 @@ eventBus.on(EVENTS.WITHDRAWAL_APPROVED, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Withdrawal Approved",
       description: `The withdrawal associated with ${data.userEmail} has been approved. Review the details if necessary.`,
       type: "success",
@@ -197,7 +197,7 @@ eventBus.on(EVENTS.WITHDRAWAL_REJECTED, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Withdrawal Rejected",
       description: `The withdrawal associated with ${data.userEmail} has been rejected. Review the details if necessary.`,
       type: "error",
@@ -217,7 +217,7 @@ eventBus.on(EVENTS.WITHDRAWAL_SUCCESS, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Withdrawal Successful",
       description: `The withdrawal associated with ${data.userEmail} has been successfully completed. Review the details if necessary.`,
       type: "success",
@@ -237,7 +237,7 @@ eventBus.on(EVENTS.WITHDRAWAL_FAILED, async (data) => {
       recipientRole: "user",
     }),
     sendNotification({
-      recipientId: "admin",
+      // recipientId: "admin",
       title: "Withdrawal Failed",
       description: `The withdrawal associated with ${data.userEmail} has failed. Review the details if necessary.`,
       type: "error",

@@ -58,7 +58,7 @@ registerAdminRoutes(app);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-server.setTimeout(60000); // 1 Minute
+// server.setTimeout(60000); // 1 Minute
 
 // socket.io for notifications
 io.on("connection", (socket) => {

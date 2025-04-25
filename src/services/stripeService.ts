@@ -4,9 +4,7 @@ import Stripe from "stripe";
 config();
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 if (!stripeSecretKey) {
-  throw new Error(
-    "Stripe secret key is not defined in environment variables"
-  );
+  throw new Error("Stripe secret key is not defined in environment variables");
 }
 
 export const createCheckoutSession = async ({ userId }: { userId: string }) => {
@@ -33,8 +31,8 @@ export const createCheckoutSession = async ({ userId }: { userId: string }) => {
         },
       ],
       mode: "subscription",
-      success_url: "http://localhost:3000/success.html",
-      cancel_url: "http://localhost:3000/cancel.html",
+      success_url: "http://localhost:5174",
+      cancel_url: "http://localhost:5174",
     });
 
     return session;
@@ -73,8 +71,8 @@ export const getOnboardingLink = async (accountId: string) => {
 
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: "http://localhost:3000/reauth",
-      return_url: "http://localhost:3000/onboarding-success",
+      refresh_url: "http://localhost:5174",
+      return_url: "http://localhost:5174",
       type: "account_onboarding",
     });
 
