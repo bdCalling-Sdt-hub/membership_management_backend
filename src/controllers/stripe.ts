@@ -151,4 +151,34 @@ const transfer_funds = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { create_payment, stripe_webhook, account_link, transfer_funds };
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
+const history = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const { id } = req.user || {};
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({
+      message: "User Id Invalid",
+    });
+    return;
+  }
+
+  const payments = await DB.PaymentModel.find({
+    userId: id,
+  }).sort({ createdAt: -1 });
+
+  res.status(200).json(payments);
+};
+
+export {
+  create_payment,
+  stripe_webhook,
+  account_link,
+  transfer_funds,
+  history,
+};

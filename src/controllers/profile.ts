@@ -21,6 +21,8 @@ const profile = async (req: Request, res: Response): Promise<void> => {
       phoneNumber: 1,
       dateOfBirth: 1,
       gender: 1,
+      referralCode: 1,
+      _id: 1,
     });
 
     res.status(200).json({
@@ -30,6 +32,8 @@ const profile = async (req: Request, res: Response): Promise<void> => {
       phoneNumber: user?.phoneNumber || null,
       dateOfBirth: user?.dateOfBirth || null,
       gender: user?.gender || null,
+      referralCode: user?.referralCode || null,
+      _id: user?._id || null,
     });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
