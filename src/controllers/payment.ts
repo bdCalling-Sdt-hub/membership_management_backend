@@ -4,7 +4,7 @@ import { Request as ExpressRequest, Response } from "express";
 interface Request extends ExpressRequest {
   user?: any;
 }
-import DB from "src/db";
+import DB from "../db";
 import { v4 } from "uuid";
 
 const balance = async (req: Request, res: Response): Promise<void> => {

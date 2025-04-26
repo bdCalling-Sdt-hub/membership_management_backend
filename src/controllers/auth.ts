@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { validate } from "email-validator";
 import { StatusCodes } from "http-status-codes";
-import DB from "src/db";
+import DB from "../db";
 import { compare, hash } from "bcrypt";
 import { generate } from "otp-generator";
 import { JwtPayload, sign, verify } from "jsonwebtoken";

@@ -1,6 +1,6 @@
 import { Request as ExpressRequest, Response } from "express";
 import { isValidObjectId } from "mongoose";
-import DB from "src/db";
+import DB from "../db";
 
 interface Request extends ExpressRequest {
   user?: {

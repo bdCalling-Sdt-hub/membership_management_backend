@@ -2,7 +2,7 @@ import { Request as ExpressRequest, Response } from "express";
 interface Request extends ExpressRequest {
     user?: any;
 }
-import DB from "src/db";
+import DB from "../db";
 import { Types } from "mongoose";
 
 const overview = async (req: Request, res: Response): Promise<void> => {

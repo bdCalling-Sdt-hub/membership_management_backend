@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import { Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
-import DB from "src/db";
+import DB from "../db";
 
 config();
 

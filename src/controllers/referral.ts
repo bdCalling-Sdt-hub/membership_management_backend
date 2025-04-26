@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import DB from "src/db";
+import DB from "../db";
 
 const referral_commissions = async (
   req: Request,

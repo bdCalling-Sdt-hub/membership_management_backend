@@ -7,7 +7,7 @@ import distributeReferralEarnings from "@utils/distributeReferralEarnings";
 import { triggerNotification } from "@utils/eventBus";
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
-import DB from "src/db";
+import DB from "../db";
 import Stripe from "stripe";
 
 // subscription

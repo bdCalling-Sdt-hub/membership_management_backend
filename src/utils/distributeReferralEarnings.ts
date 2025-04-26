@@ -1,5 +1,5 @@
 import { createStripeConnectExpressAccount } from "@services/stripeService";
-import DB from "src/db";
+import DB from "../db";
 import { triggerNotification } from "@utils/eventBus";
 
 export default async function distributeReferralEarnings(

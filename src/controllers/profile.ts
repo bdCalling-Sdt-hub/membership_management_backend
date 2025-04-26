@@ -3,7 +3,7 @@ interface Request extends ExpressRequest {
   user?: any;
 }
 import { config } from "dotenv";
-import DB from "src/db";
+import DB from "../db";
 import uploadService from "@services/uploadService";
 import { compare, hash } from "bcrypt";
 import { triggerNotification } from "@utils/eventBus";

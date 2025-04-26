@@ -1,4 +1,4 @@
-import DB from "src/db";
+import DB from "../db";
 
 export default async function (userId: string) {
   const user = await DB.UserModel.findById(userId);

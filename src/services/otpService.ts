@@ -1,5 +1,5 @@
 import { sendEmail } from "@services/emailService";
-import Schema from "src/schema";
+import Schema from "../schema";
 
 export async function sendVerificationEmail(
   email: string,

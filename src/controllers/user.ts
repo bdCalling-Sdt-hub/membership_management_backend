@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import DB from "src/db";
+import DB from "../db";
 
 const users = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
-import { io } from "src";
-import DB from "src/db";
+import { io } from "../index";
+import DB from "../db";
 import { EVENTS } from "src/services/notificationService";
 
 class EventBus extends EventEmitter {}
