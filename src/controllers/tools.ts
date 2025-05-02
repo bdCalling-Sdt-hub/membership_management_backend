@@ -147,7 +147,7 @@ const access_file = async (req: Request, res: Response): Promise<void> => {
     );
 
     if (video) {
-      res.redirect(video.url);
+      res.redirect(`https://youtu.be/${video.url}`);
       return;
     }
 
@@ -528,18 +528,17 @@ const update_tool = async (req: Request, res: Response): Promise<void> => {
     "file"
   ];
 
-  if(!youtube_url) {
+  if (!youtube_url) {
     if (type === "video" && !video) {
       res.status(400).json({ message: "Video is required" });
       return;
     }
-  
+
     if (type === "file" && !file) {
       res.status(400).json({ message: "File is required" });
       return;
     }
   }
-
 
   const tool = await DB.ToolModel.findById(toolId);
 
@@ -556,16 +555,17 @@ const update_tool = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    let videoUrl = youtube_url ? getYouTubeVideoID(youtube_url.toString()) : null;
-    if(videoUrl === null) {
+    let videoUrl = youtube_url
+      ? getYouTubeVideoID(youtube_url.toString())
+      : null;
+    if (videoUrl === null) {
       videoUrl = await uploadService(video[0], "video");
-  
+
       if (!videoUrl) {
         res.status(500).json({ message: "Error uploading video" });
         return;
       }
     }
-
 
     await DB.VideoModel.findByIdAndUpdate(id, {
       toolId,
