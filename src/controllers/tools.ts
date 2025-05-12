@@ -146,8 +146,15 @@ const access_file = async (req: Request, res: Response): Promise<void> => {
       { new: true }
     );
 
-    if (video) {
+    const youtubeId = await DB.ToolModel.findOne({ name: "Youtube" });
+
+    if (video && video.toolId.toString() === youtubeId?._id.toString()) {
       res.redirect(`https://youtu.be/${video.url}`);
+      return;
+    }
+
+    if (video) {
+      res.redirect(video.url);
       return;
     }
 
